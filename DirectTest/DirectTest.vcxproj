@@ -194,9 +194,9 @@
     <ClCompile Include="Renderer\DirectRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="Resources\Shader.hlsl">
+    <FxCompile Include="Resources\PixelShader.hlsl">
       <FileType>Document</FileType>
-    </CustomBuild>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\DirectTest.ico" />
@@ -204,6 +204,14 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources\DirectTest.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resources\VertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

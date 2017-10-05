@@ -193,7 +193,6 @@ void DirectRenderer::LoadAssets()
 
 		ThrowIfFailed(D3DCompileFromFile(L"Resources/shader.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
 		ThrowIfFailed(D3DCompileFromFile(L"Resources/shader.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
-
 		// Definir el input del vertex shader
 		D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
 		{

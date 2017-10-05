@@ -89,8 +89,11 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="Resources\Shader.hlsl">
+    <FxCompile Include="Resources\VertexShader.hlsl">
       <Filter>Resource Files</Filter>
-    </CustomBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\PixelShader.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

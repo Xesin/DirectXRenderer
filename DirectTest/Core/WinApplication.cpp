@@ -132,7 +132,7 @@ LRESULT CALLBACK WinApplication::WindowProc(HWND hWnd, UINT message, WPARAM wPar
 			SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pCreateStruct->lpCreateParams));
 			wasHandled = true;
 		}
-		return 0;
+		break;
 
 		case WM_KEYDOWN:
 			if (pSample)
@@ -140,7 +140,7 @@ LRESULT CALLBACK WinApplication::WindowProc(HWND hWnd, UINT message, WPARAM wPar
 				pSample->OnKeyDown(static_cast<UINT8>(wParam));
 				wasHandled = true;
 			}
-			return 0;
+			break;
 
 		case WM_KEYUP:
 			if (pSample)
@@ -148,7 +148,7 @@ LRESULT CALLBACK WinApplication::WindowProc(HWND hWnd, UINT message, WPARAM wPar
 				pSample->OnKeyUp(static_cast<UINT8>(wParam));
 				wasHandled = true;
 			}
-			return 0;
+			break;
 
 		case WM_PAINT:
 			if (pSample)
@@ -157,13 +157,14 @@ LRESULT CALLBACK WinApplication::WindowProc(HWND hWnd, UINT message, WPARAM wPar
 				pSample->OnRender();
 				wasHandled = true;
 			}
-			return 0;
+			break;
 		case WM_SIZE:
 		{
 			UINT width = LOWORD(lParam);
 			UINT height = HIWORD(lParam);
 			pSample->renderer->OnResize(width, height);
-			return 0;
+			wasHandled = true;
+			break;
 		}
 
 		case WM_DESTROY:
