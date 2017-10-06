@@ -154,6 +154,7 @@ LRESULT CALLBACK WinApplication::WindowProc(HWND hWnd, UINT message, WPARAM wPar
 			if (pSample)
 			{
 				pSample->OnUpdate();
+				pSample->renderer->OnUpdate();
 				pSample->OnRender();
 				wasHandled = true;
 			}

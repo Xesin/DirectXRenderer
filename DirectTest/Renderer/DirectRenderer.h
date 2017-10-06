@@ -47,12 +47,27 @@ private:
 	ComPtr<ID3D12CommandQueue> commandQueue;
 	ComPtr<ID3D12RootSignature> rootSignature;
 	ComPtr<ID3D12DescriptorHeap> rtvHeap;
+	ComPtr<ID3D12DescriptorHeap> cbvHeap;
 	ComPtr<ID3D12PipelineState> pipelineState;
 	ComPtr<ID3D12GraphicsCommandList> commandList;
 	UINT rtvDescriptorSize;
 
+	struct Vertex
+	{
+		XMFLOAT3 position;
+		XMFLOAT4 color;
+	};
+
+	struct SceneConstantBuffer
+	{
+		XMFLOAT4 offset;
+	};
+
 	ComPtr<ID3D12Resource> vertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+	ComPtr<ID3D12Resource> constantBuffer;
+	SceneConstantBuffer constantBufferData;
+	UINT8* pCbvDataBegin;
 
 	UINT frameIndex;
 	HANDLE fenceEvent;
@@ -62,9 +77,5 @@ private:
 	UINT width;
 	UINT height;
 
-	struct Vertex
-	{
-		XMFLOAT3 position;
-		XMFLOAT4 color;
-	};
+	
 };
