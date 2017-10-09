@@ -3,7 +3,7 @@
 #include <DirectXMath.h>
 #include <dxgi1_4.h>
 #include <wrl\client.h>
-
+#include <vector>
 #include "d3dx12.h"
 
 using namespace Microsoft::WRL;
@@ -27,7 +27,9 @@ private:
 	void LoadPipeline();
 	void LoadAssets();
 	void PopulateCommandList();
-	void WaitForPreviousFrame();
+	void MoveToNextFrame();
+	void WaitForGpu();
+	std::vector<UINT8> GenerateTextureData();
 
 	void GetHardwareAdapter(IDXGIFactory4* pFactory, IDXGIAdapter1** ppAdapter);
 
@@ -43,11 +45,12 @@ private:
 	ComPtr<IDXGISwapChain3> swapChain;
 	ComPtr<ID3D12Device> device;
 	ComPtr<ID3D12Resource> renderTargets[FRAME_COUNT];
-	ComPtr<ID3D12CommandAllocator> commandAllocator;
+	ComPtr<ID3D12CommandAllocator> commandAllocators[FRAME_COUNT];
 	ComPtr<ID3D12CommandQueue> commandQueue;
 	ComPtr<ID3D12RootSignature> rootSignature;
 	ComPtr<ID3D12DescriptorHeap> rtvHeap;
 	ComPtr<ID3D12DescriptorHeap> cbvHeap;
+	ComPtr<ID3D12DescriptorHeap> srvHeap;
 	ComPtr<ID3D12PipelineState> pipelineState;
 	ComPtr<ID3D12GraphicsCommandList> commandList;
 	UINT rtvDescriptorSize;
@@ -55,7 +58,7 @@ private:
 	struct Vertex
 	{
 		XMFLOAT3 position;
-		XMFLOAT4 color;
+		XMFLOAT2 uv;
 	};
 
 	struct SceneConstantBuffer
@@ -67,12 +70,15 @@ private:
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	ComPtr<ID3D12Resource> constantBuffer;
 	SceneConstantBuffer constantBufferData;
+	ComPtr<ID3D12Resource> texture;
 	UINT8* pCbvDataBegin;
 
+	//Objetos de sincronización
 	UINT frameIndex;
 	HANDLE fenceEvent;
 	ComPtr<ID3D12Fence> fence;
 	UINT64 fenceValue;
+	UINT64 fenceValues[FRAME_COUNT];
 
 	UINT width;
 	UINT height;
