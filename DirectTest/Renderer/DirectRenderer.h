@@ -49,7 +49,6 @@ private:
 	ComPtr<ID3D12CommandQueue> commandQueue;
 	ComPtr<ID3D12RootSignature> rootSignature;
 	ComPtr<ID3D12DescriptorHeap> rtvHeap;
-	ComPtr<ID3D12DescriptorHeap> cbvHeap;
 	ComPtr<ID3D12DescriptorHeap> srvHeap;
 	ComPtr<ID3D12PipelineState> pipelineState;
 	ComPtr<ID3D12GraphicsCommandList> commandList;
@@ -68,8 +67,6 @@ private:
 
 	ComPtr<ID3D12Resource> vertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
-	ComPtr<ID3D12Resource> constantBuffer;
-	SceneConstantBuffer constantBufferData;
 	ComPtr<ID3D12Resource> texture;
 	UINT8* pCbvDataBegin;
 

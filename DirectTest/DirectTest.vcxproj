@@ -101,7 +101,7 @@
       <ShaderType>
       </ShaderType>
       <EntryPointName>VSMain</EntryPointName>
-      <ObjectFileOutput>$(OutDir)Resources\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>Resources\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -123,8 +123,8 @@
       <ShaderType>
       </ShaderType>
       <EntryPointName>VSMain</EntryPointName>
-      <ShaderModel>4.0</ShaderModel>
-      <ObjectFileOutput>$(OutDir)Resources\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput>Resources\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -150,7 +150,7 @@
       <ShaderType>
       </ShaderType>
       <EntryPointName>VSMain</EntryPointName>
-      <ObjectFileOutput>$(OutDir)Resources\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>Resources\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -176,7 +176,8 @@
       <ShaderType>
       </ShaderType>
       <EntryPointName>VSMain</EntryPointName>
-      <ObjectFileOutput>$(OutDir)Resources\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>Resources\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel>5.0</ShaderModel>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

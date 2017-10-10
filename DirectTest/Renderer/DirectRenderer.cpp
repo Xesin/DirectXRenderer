@@ -128,15 +128,6 @@ void DirectRenderer::LoadPipeline()
 		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		ThrowIfFailed(device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap)));
-
-		// Describe and create a constant buffer view (CBV) descriptor heap.
-		// Flags indicate that this descriptor heap can be bound to the pipeline 
-		// and that descriptors contained in it can be referenced by a root table.
-		D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc = {};
-		cbvHeapDesc.NumDescriptors = 1;
-		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		ThrowIfFailed(device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&cbvHeap)));
 	}
 
 	// Create frame resources.
@@ -170,13 +161,11 @@ void DirectRenderer::LoadAssets()
 			featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
 		}
 
-		CD3DX12_DESCRIPTOR_RANGE1 ranges[2];
-		CD3DX12_ROOT_PARAMETER1 rootParameters[2];
+		CD3DX12_DESCRIPTOR_RANGE1 ranges[1];
+		CD3DX12_ROOT_PARAMETER1 rootParameters[1];
 
 		ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
 		rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
-		ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
-		rootParameters[1].InitAsDescriptorTable(1, &ranges[1], D3D12_SHADER_VISIBILITY_VERTEX);
 
 		// Allow input layout and deny uneccessary access to certain pipeline stages.
 		D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
@@ -208,8 +197,6 @@ void DirectRenderer::LoadAssets()
 
 	// Create the pipeline state, which includes compiling and loading shaders.
 	{
-		ComPtr<ID3DBlob> vertexShader;
-		ComPtr<ID3DBlob> pixelShader;
 
 #if defined(_DEBUG)
 		// Enable better shader debugging with the graphics debugging tools.
@@ -217,9 +204,13 @@ void DirectRenderer::LoadAssets()
 #else
 		UINT compileFlags = 0;
 #endif
+		UINT8* pVertexShaderData;
+		UINT vertexShaderDataLength;
+		UINT8* pPixelShaderData;
+		UINT pixelShaderDataLength;
 
-		ThrowIfFailed(D3DCompileFromFile(L"Resources/VertexShader.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", compileFlags, 0, &vertexShader, nullptr));
-		ThrowIfFailed(D3DCompileFromFile(L"Resources/PixelShader.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &pixelShader, nullptr));
+		ThrowIfFailed(ReadDataFromFile(L"Resources/VertexShader.cso", &pVertexShaderData, &vertexShaderDataLength));
+		ThrowIfFailed(ReadDataFromFile(L"Resources/PixelShader.cso", &pPixelShaderData, &pixelShaderDataLength));
 
 		// Define the vertex input layout.
 		D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
@@ -232,8 +223,8 @@ void DirectRenderer::LoadAssets()
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 		psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
 		psoDesc.pRootSignature = rootSignature.Get();
-		psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
-		psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
+		psoDesc.VS = CD3DX12_SHADER_BYTECODE(pVertexShaderData, vertexShaderDataLength);
+		psoDesc.PS = CD3DX12_SHADER_BYTECODE(pPixelShaderData, pixelShaderDataLength);
 		psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 		psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 		psoDesc.DepthStencilState.DepthEnable = FALSE;
@@ -346,29 +337,6 @@ void DirectRenderer::LoadAssets()
 		device->CreateShaderResourceView(texture.Get(), &srvDesc, srvHeap->GetCPUDescriptorHandleForHeapStart());
 	}
 
-	// Create the constant buffer.
-	{
-		ThrowIfFailed(device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(1024 * 64),
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			nullptr,
-			IID_PPV_ARGS(&constantBuffer)));
-
-		// Describe and create a constant buffer view.
-		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-		cbvDesc.BufferLocation = constantBuffer->GetGPUVirtualAddress();
-		cbvDesc.SizeInBytes = (sizeof(SceneConstantBuffer) + 255) & ~255;	// CB size is required to be 256-byte aligned.
-		device->CreateConstantBufferView(&cbvDesc, cbvHeap->GetCPUDescriptorHandleForHeapStart());
-
-		// Map and initialize the constant buffer. We don't unmap this until the
-		// app closes. Keeping things mapped for the lifetime of the resource is okay.
-		CD3DX12_RANGE readRange(0, 0);		// We do not intend to read from this resource on the CPU.
-		ThrowIfFailed(constantBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pCbvDataBegin)));
-		memcpy(pCbvDataBegin, &constantBufferData, sizeof(constantBufferData));
-	}
-
 	// Close the command list and execute it to begin the initial GPU setup.
 	ThrowIfFailed(commandList->Close());
 	ID3D12CommandList* ppCommandLists[] = { commandList.Get() };
@@ -396,15 +364,6 @@ void DirectRenderer::LoadAssets()
 // Update frame-based values.
 void DirectRenderer::OnUpdate()
 {
-	const float translationSpeed = 0.005f;
-	const float offsetBounds = 1.25f;
-
-	constantBufferData.offset.x += translationSpeed;
-	if (constantBufferData.offset.x > offsetBounds)
-	{
-		constantBufferData.offset.x = -offsetBounds;
-	}
-	memcpy(pCbvDataBegin, &constantBufferData, sizeof(constantBufferData));
 }
 
 // Render the scene.
@@ -458,11 +417,6 @@ void DirectRenderer::PopulateCommandList()
 	commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
 	commandList->SetGraphicsRootDescriptorTable(0, srvHeap->GetGPUDescriptorHandleForHeapStart());
-
-	/*ID3D12DescriptorHeap* ppHeaps2[] = { cbvHeap.Get() };
-	commandList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
-
-	commandList->SetGraphicsRootDescriptorTable(1, cbvHeap->GetGPUDescriptorHandleForHeapStart());*/
 
 	commandList->RSSetViewports(1, &viewport);
 	commandList->RSSetScissorRects(1, &scissorRect);
