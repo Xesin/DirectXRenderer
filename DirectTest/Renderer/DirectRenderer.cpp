@@ -148,25 +148,16 @@ void DirectRenderer::LoadPipeline()
 // Load the sample assets.
 void DirectRenderer::LoadAssets()
 {
+	HRESULT hr;
+	// create a root descriptor, which explains where to find the data for this root parameter
+	D3D12_ROOT_DESCRIPTOR rootCBVDescriptor;
+	rootCBVDescriptor.RegisterSpace = 0;
+	rootCBVDescriptor.ShaderRegister = 0;
 
-	// create a descriptor range (descriptor table) and fill it out
-	// this is a range of descriptors inside a descriptor heap
-	D3D12_DESCRIPTOR_RANGE  descriptorTableRanges[1]; // only one range right now
-	descriptorTableRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV; // this is a range of constant buffer views (descriptors)
-	descriptorTableRanges[0].NumDescriptors = 1; // we only have one constant buffer, so the range is only 1
-	descriptorTableRanges[0].BaseShaderRegister = 0; // start index of the shader registers in the range
-	descriptorTableRanges[0].RegisterSpace = 0; // space 0. can usually be zero
-	descriptorTableRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // this appends the range to the end of the root signature descriptor tables
-
-																									   // create a descriptor table
-	D3D12_ROOT_DESCRIPTOR_TABLE descriptorTable;
-	descriptorTable.NumDescriptorRanges = _countof(descriptorTableRanges); // we only have one range
-	descriptorTable.pDescriptorRanges = &descriptorTableRanges[0]; // the pointer to the beginning of our ranges array
-
-																   // create a root parameter and fill it out
+	// create a root parameter and fill it out
 	D3D12_ROOT_PARAMETER  rootParameters[1]; // only one parameter right now
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // this is a descriptor table
-	rootParameters[0].DescriptorTable = descriptorTable; // this is our descriptor table for this root parameter
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // this is a constant buffer view root descriptor
+	rootParameters[0].Descriptor = rootCBVDescriptor; // this is the root descriptor for this root parameter
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // our pixel shader will be the only shader accessing this parameter for now
 
 	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
@@ -181,7 +172,6 @@ void DirectRenderer::LoadAssets()
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS);
 
 	ID3DBlob* signature;
-	HRESULT hr;
 	hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr);
 	if (FAILED(hr))
 	{
@@ -426,11 +416,11 @@ void DirectRenderer::PopulateCommandList()
 	commandList->SetGraphicsRootSignature(rootSignature.Get());
 
 	// set constant buffer descriptor heap
-	ID3D12DescriptorHeap* descriptorHeaps[] = { cbvHeap.Get() };
-	commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	//ID3D12DescriptorHeap* descriptorHeaps[] = { cbvHeap.Get() };
+	//commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	// set the root descriptor table 0 to the constant buffer descriptor heap
-	commandList->SetGraphicsRootDescriptorTable(0, cbvHeap->GetGPUDescriptorHandleForHeapStart());
+	//commandList->SetGraphicsRootDescriptorTable(0, cbvHeap->GetGPUDescriptorHandleForHeapStart());
 
 	commandList->RSSetViewports(1, &viewport);
 	commandList->RSSetScissorRects(1, &scissorRect);
@@ -446,6 +436,9 @@ void DirectRenderer::PopulateCommandList()
 	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+
+	commandList->SetGraphicsRootConstantBufferView(0, constBufferUploadHeap->GetGPUVirtualAddress());
+
 	commandList->DrawInstanced(3, 1, 0, 0);
 
 	// Indicate that the back buffer will now be used to present.
