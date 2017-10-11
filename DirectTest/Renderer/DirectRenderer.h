@@ -49,6 +49,7 @@ private:
 	ComPtr<ID3D12CommandQueue> commandQueue;
 	ComPtr<ID3D12RootSignature> rootSignature;
 	ComPtr<ID3D12DescriptorHeap> rtvHeap;
+	ComPtr<ID3D12DescriptorHeap> cbvHeap;
 	ComPtr<ID3D12PipelineState> pipelineState;
 	ComPtr<ID3D12GraphicsCommandList> commandList;
 	UINT rtvDescriptorSize;
@@ -57,10 +58,19 @@ private:
 	{
 		XMFLOAT3 position;
 		XMFLOAT2 uv;
+		XMFLOAT4 color;
+	};
+
+	struct AppBuffer
+	{
+		XMFLOAT4 offset;
 	};
 
 	ComPtr<ID3D12Resource> vertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+	AppBuffer constBuffer;
+	ComPtr<ID3D12Resource> constBufferUploadHeap;
+	UINT8* constBufferGPUAddress;
 
 	//Objetos de sincronización
 	UINT frameIndex;

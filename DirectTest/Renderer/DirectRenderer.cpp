@@ -121,6 +121,12 @@ void DirectRenderer::LoadPipeline()
 		ThrowIfFailed(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)));
 
 		rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+		D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
+		heapDesc.NumDescriptors = 1;
+		heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		ThrowIfFailed(device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&cbvHeap)));
 	}
 
 	// Create frame resources.
@@ -142,10 +148,37 @@ void DirectRenderer::LoadPipeline()
 // Load the sample assets.
 void DirectRenderer::LoadAssets()
 {
-	// create root signature
+
+	// create a descriptor range (descriptor table) and fill it out
+	// this is a range of descriptors inside a descriptor heap
+	D3D12_DESCRIPTOR_RANGE  descriptorTableRanges[1]; // only one range right now
+	descriptorTableRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV; // this is a range of constant buffer views (descriptors)
+	descriptorTableRanges[0].NumDescriptors = 1; // we only have one constant buffer, so the range is only 1
+	descriptorTableRanges[0].BaseShaderRegister = 0; // start index of the shader registers in the range
+	descriptorTableRanges[0].RegisterSpace = 0; // space 0. can usually be zero
+	descriptorTableRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // this appends the range to the end of the root signature descriptor tables
+
+																									   // create a descriptor table
+	D3D12_ROOT_DESCRIPTOR_TABLE descriptorTable;
+	descriptorTable.NumDescriptorRanges = _countof(descriptorTableRanges); // we only have one range
+	descriptorTable.pDescriptorRanges = &descriptorTableRanges[0]; // the pointer to the beginning of our ranges array
+
+																   // create a root parameter and fill it out
+	D3D12_ROOT_PARAMETER  rootParameters[1]; // only one parameter right now
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // this is a descriptor table
+	rootParameters[0].DescriptorTable = descriptorTable; // this is our descriptor table for this root parameter
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // our pixel shader will be the only shader accessing this parameter for now
 
 	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	rootSignatureDesc.Init(_countof(rootParameters), // we have 1 root parameter
+		rootParameters, // a pointer to the beginning of our root parameters array
+		0,
+		nullptr,
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | // we can deny shader stages here for better performance
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS);
 
 	ID3DBlob* signature;
 	HRESULT hr;
@@ -177,7 +210,8 @@ void DirectRenderer::LoadAssets()
 	D3D12_INPUT_ELEMENT_DESC inputLayout[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12+8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
 	// fill out an input layout description structure
@@ -216,11 +250,7 @@ void DirectRenderer::LoadAssets()
 	psoDesc.NumRenderTargets = 1; // we are only binding one render target
 
 								  // create the pso
-	hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState));
-	if (FAILED(hr))
-	{
-		return;
-	}
+	ThrowIfFailed(device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState)));
 
 	// Create the command list.
 	ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[frameIndex].Get(), pipelineState.Get(), IID_PPV_ARGS(&commandList)));
@@ -239,67 +269,93 @@ void DirectRenderer::LoadAssets()
 	}
 
 	// Create vertex buffer
+	{
+		// a triangle
+		Vertex vList[] = {
+			{ { 0.0f, 0.25f * aspectRatio, 0.0f },{ 0.5f, 0.0f }, { 1.0f, 0.0, 0.0f, 1.0f } },
+			{ { 0.25f, -0.25f * aspectRatio, 0.0f },{ 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+			{ { -0.25f, -0.25f * aspectRatio, 0.0f },{ 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
+		};
 
-	// a triangle
-	Vertex vList[] = {
-		{ { 0.0f, 0.25f * aspectRatio, 0.0f },{ 0.5f, 0.0f } },
-		{ { 0.25f, -0.25f * aspectRatio, 0.0f },{ 1.0f, 1.0f } },
-		{ { -0.25f, -0.25f * aspectRatio, 0.0f },{ 0.0f, 1.0f } }
-	};
+		int vBufferSize = sizeof(vList);
 
-	int vBufferSize = sizeof(vList);
+		// create default heap
+		// default heap is memory on the GPU. Only the GPU has access to this memory
+		// To get data into this heap, we will have to upload the data using
+		// an upload heap
+		device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), // a default heap
+			D3D12_HEAP_FLAG_NONE, // no flags
+			&CD3DX12_RESOURCE_DESC::Buffer(vBufferSize), // resource description for a buffer
+			D3D12_RESOURCE_STATE_COPY_DEST, // we will start this heap in the copy destination state since we will copy data
+											// from the upload heap to this heap
+			nullptr, // optimized clear value must be null for this type of resource. used for render targets and depth/stencil buffers
+			IID_PPV_ARGS(&vertexBuffer));
 
-	// create default heap
-	// default heap is memory on the GPU. Only the GPU has access to this memory
-	// To get data into this heap, we will have to upload the data using
-	// an upload heap
-	device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), // a default heap
-		D3D12_HEAP_FLAG_NONE, // no flags
-		&CD3DX12_RESOURCE_DESC::Buffer(vBufferSize), // resource description for a buffer
-		D3D12_RESOURCE_STATE_COPY_DEST, // we will start this heap in the copy destination state since we will copy data
-										// from the upload heap to this heap
-		nullptr, // optimized clear value must be null for this type of resource. used for render targets and depth/stencil buffers
-		IID_PPV_ARGS(&vertexBuffer));
+		// we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
+		vertexBuffer->SetName(L"Vertex Buffer Resource Heap");
 
-	// we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
-	vertexBuffer->SetName(L"Vertex Buffer Resource Heap");
+		// create upload heap
+		// upload heaps are used to upload data to the GPU. CPU can write to it, GPU can read from it
+		// We will upload the vertex buffer using this heap to the default heap
+		ID3D12Resource* vBufferUploadHeap;
+		device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
+			D3D12_HEAP_FLAG_NONE, // no flags
+			&CD3DX12_RESOURCE_DESC::Buffer(vBufferSize), // resource description for a buffer
+			D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
+			nullptr,
+			IID_PPV_ARGS(&vBufferUploadHeap));
+		vBufferUploadHeap->SetName(L"Vertex Buffer Upload Resource Heap");
 
-	// create upload heap
-	// upload heaps are used to upload data to the GPU. CPU can write to it, GPU can read from it
-	// We will upload the vertex buffer using this heap to the default heap
-	ID3D12Resource* vBufferUploadHeap;
-	device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
-		D3D12_HEAP_FLAG_NONE, // no flags
-		&CD3DX12_RESOURCE_DESC::Buffer(vBufferSize), // resource description for a buffer
-		D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
-		nullptr,
-		IID_PPV_ARGS(&vBufferUploadHeap));
-	vBufferUploadHeap->SetName(L"Vertex Buffer Upload Resource Heap");
+		// store vertex buffer in upload heap
+		D3D12_SUBRESOURCE_DATA vertexData = {};
+		vertexData.pData = reinterpret_cast<BYTE*>(vList); // pointer to our vertex array
+		vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
+		vertexData.SlicePitch = vBufferSize; // also the size of our triangle vertex data
 
-	// store vertex buffer in upload heap
-	D3D12_SUBRESOURCE_DATA vertexData = {};
-	vertexData.pData = reinterpret_cast<BYTE*>(vList); // pointer to our vertex array
-	vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
-	vertexData.SlicePitch = vBufferSize; // also the size of our triangle vertex data
+											 // we are now creating a command with the command list to copy the data from
+											 // the upload heap to the default heap
+		UpdateSubresources<1>(commandList.Get(), vertexBuffer.Get(), vBufferUploadHeap, 0, 0, 1, &vertexData);
 
-										 // we are now creating a command with the command list to copy the data from
-										 // the upload heap to the default heap
-	UpdateSubresources(commandList.Get(), vertexBuffer.Get(), vBufferUploadHeap, 0, 0, 1, &vertexData);
+		// transition the vertex buffer data from copy destination state to vertex buffer state
+		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
 
-	// transition the vertex buffer data from copy destination state to vertex buffer state
-	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
+		// Now we execute the command list to upload the initial assets (triangle data)
+		commandList->Close();
+		ID3D12CommandList* ppCommandLists[] = { commandList.Get() };
+		commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
-	// Now we execute the command list to upload the initial assets (triangle data)
-	commandList->Close();
-	ID3D12CommandList* ppCommandLists[] = { commandList.Get() };
-	commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+		// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
+		vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
+		vertexBufferView.StrideInBytes = sizeof(Vertex);
+		vertexBufferView.SizeInBytes = vBufferSize;
+	}
 
-	// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
-	vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
-	vertexBufferView.StrideInBytes = sizeof(Vertex);
-	vertexBufferView.SizeInBytes = vBufferSize;
+	//Create the constant buffer
+	{
+		device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // this heap will be used to upload the constant buffer data
+			D3D12_HEAP_FLAG_NONE, // no flags
+			&CD3DX12_RESOURCE_DESC::Buffer(1024 * 64), // size of the resource heap. Must be a multiple of 64KB for single-textures and constant buffers
+			D3D12_RESOURCE_STATE_GENERIC_READ, // will be data that is read from so we keep it in the generic read state
+			nullptr, // we do not have use an optimized clear value for constant buffers
+			IID_PPV_ARGS(&constBufferUploadHeap));
+
+		constBufferUploadHeap->SetName(L"Constant Buffer Upload Resource Heap");
+
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+		cbvDesc.BufferLocation = constBufferUploadHeap->GetGPUVirtualAddress();
+		cbvDesc.SizeInBytes = (sizeof(AppBuffer) + 255) & ~255;    // CB size is required to be 256-byte aligned.
+		device->CreateConstantBufferView(&cbvDesc, cbvHeap->GetCPUDescriptorHandleForHeapStart());
+
+		ZeroMemory(&constBuffer, sizeof(AppBuffer));
+
+		CD3DX12_RANGE readRange(0, 0);    // We do not intend to read from this resource on the CPU. (End is less than or equal to begin)
+		hr = constBufferUploadHeap->Map(0, &readRange, reinterpret_cast<void**>(&constBufferGPUAddress));
+		memcpy(constBufferGPUAddress, &constBuffer, sizeof(constBuffer));
+		constBufferUploadHeap->Unmap(0, nullptr);
+	}
 
 	// Wait for the command list to execute; we are reusing the same command 
 	// list in our main loop but for now, we just want to wait for setup to 
@@ -311,6 +367,15 @@ void DirectRenderer::LoadAssets()
 // Update frame-based values.
 void DirectRenderer::OnUpdate()
 {
+	const float translationSpeed = 0.005f;
+	const float offsetBounds = 1.25f;
+
+	constBuffer.offset.x += translationSpeed;
+	if (constBuffer.offset.x > offsetBounds)
+	{
+		constBuffer.offset.x = -offsetBounds;
+	}
+	memcpy(constBufferGPUAddress, &constBuffer, sizeof(constBuffer));
 }
 
 // Render the scene.
@@ -360,10 +425,12 @@ void DirectRenderer::PopulateCommandList()
 	// Set necessary state.
 	commandList->SetGraphicsRootSignature(rootSignature.Get());
 
-	/*ID3D12DescriptorHeap* ppHeaps[] = { m_cbvSrvHeap.Get() };
-	commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);*/
+	// set constant buffer descriptor heap
+	ID3D12DescriptorHeap* descriptorHeaps[] = { cbvHeap.Get() };
+	commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-	//commandList->SetGraphicsRootDescriptorTable(0, m_cbvSrvHeap->GetGPUDescriptorHandleForHeapStart());
+	// set the root descriptor table 0 to the constant buffer descriptor heap
+	commandList->SetGraphicsRootDescriptorTable(0, cbvHeap->GetGPUDescriptorHandleForHeapStart());
 
 	commandList->RSSetViewports(1, &viewport);
 	commandList->RSSetScissorRects(1, &scissorRect);
