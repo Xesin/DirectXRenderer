@@ -60,6 +60,9 @@
     <ClInclude Include="Renderer\Texture2D.h">
       <Filter>Header Files\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer\d3dx12.h">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer\DirectRenderer.cpp">

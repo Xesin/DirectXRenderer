@@ -10,6 +10,11 @@ struct VSInput
     float2 uv : TEXCOORD;
 };
 
+//cbuffer AppConstBuffer : register(b0)
+//{
+//    float4 offset;
+//}
+
 PSInput VSMain(VSInput input)
 {
     PSInput result;
