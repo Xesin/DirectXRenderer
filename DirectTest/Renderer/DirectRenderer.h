@@ -63,12 +63,17 @@ private:
 
 	struct AppBuffer
 	{
-		XMFLOAT4 offset;
+		XMFLOAT4X4 wvpMat;
 	};
 
 	ComPtr<ID3D12Resource> vertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+	ComPtr<ID3D12Resource> indexBuffer; // a default buffer in GPU memory that we will load index data for our triangle into
+	D3D12_INDEX_BUFFER_VIEW indexBufferView; // a structure holding information about the index buffer
+	ComPtr<ID3D12Resource> depthStencilBuffer; // This is the memory for our depth buffer. it will also be used for a stencil buffer in a later tutorial
+	ID3D12DescriptorHeap* dsDescriptorHeap; // This is a heap for our depth/stencil buffer descriptor
 	AppBuffer constBuffer;
+	int constBufferAlignedSize = (sizeof(constBuffer) + 255) & ~255;
 	ComPtr<ID3D12Resource> constBufferUploadHeap;
 	UINT8* constBufferGPUAddress;
 
@@ -78,6 +83,22 @@ private:
 	ComPtr<ID3D12Fence> fence;
 	UINT64 fenceValue;
 	UINT64 fenceValues[FRAME_COUNT];
+
+	XMFLOAT4X4 cameraProjMat; // this will store our projection matrix
+	XMFLOAT4X4 cameraViewMat; // this will store our view matrix
+
+	XMFLOAT4 cameraPosition; // this is our cameras position vector
+	XMFLOAT4 cameraTarget; // a vector describing the point in space our camera is looking at
+	XMFLOAT4 cameraUp; // the worlds up vector
+	XMFLOAT4 cubePos;
+	XMFLOAT4X4 cubeWorldMat; // our first cubes world matrix (transformation matrix)
+	XMFLOAT4X4 cubeRotMat; // this will keep track of our rotation for the first cube
+
+	XMFLOAT4 cube2Pos;
+	XMFLOAT4X4 cube2WorldMat; // our first cubes world matrix (transformation matrix)
+	XMFLOAT4X4 cube2RotMat; // this will keep track of our rotation for the first cube
+
+	int numCubeIndices;
 
 	UINT width;
 	UINT height;

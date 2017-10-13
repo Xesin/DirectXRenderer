@@ -14,14 +14,17 @@ struct VSInput
 
 cbuffer AppConstBuffer : register(b0)
 {
-    float4 offset;
+    float4x4 wvpMat;
+    
+    // now pad the constant buffer to be 256 byte aligned
+    float4 padding[48];
 }
 
 PSInput VSMain(VSInput input)
 {
     PSInput result;
 
-    result.position = input.position + offset;
+    result.position = mul(input.position, wvpMat);
     result.uv = input.uv;
     result.color = input.color;
     return result;
