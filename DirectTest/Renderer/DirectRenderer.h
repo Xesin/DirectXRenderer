@@ -59,11 +59,13 @@ private:
 		XMFLOAT3 position;
 		XMFLOAT2 uv;
 		XMFLOAT4 color;
+		XMFLOAT3 normal;
 	};
 
 	struct AppBuffer
 	{
 		XMFLOAT4X4 wvpMat;
+		XMFLOAT4X4 objectToWorldNormal;
 	};
 
 	ComPtr<ID3D12Resource> vertexBuffer;
