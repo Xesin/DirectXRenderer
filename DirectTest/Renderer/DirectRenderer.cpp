@@ -569,15 +569,15 @@ void DirectRenderer::LoadAssets()
 
 		constBufferUploadHeap->SetName(L"Constant Buffer Upload Resource Heap");
 
-		ZeroMemory(&constBuffer, sizeof(AppBuffer));
+		ZeroMemory(&constantBufferData, sizeof(AppBuffer));
 
-		XMStoreFloat4x4(&constBuffer.wvpMat, XMMatrixTranspose(XMMatrixIdentity()));
-		XMStoreFloat4x4(&constBuffer.worldMat, XMMatrixTranspose(XMMatrixIdentity()));
+		XMStoreFloat4x4(&constantBufferData.wvpMat, XMMatrixTranspose(XMMatrixIdentity()));
+		XMStoreFloat4x4(&constantBufferData.worldMat, XMMatrixTranspose(XMMatrixIdentity()));
 
 		CD3DX12_RANGE readRange(0, 0);    // We do not intend to read from this resource on the CPU. (End is less than or equal to begin)
 		hr = constBufferUploadHeap->Map(0, &readRange, reinterpret_cast<void**>(&constBufferGPUAddress));
-		memcpy(constBufferGPUAddress, &constBuffer, sizeof(constBuffer));
-		memcpy(constBufferGPUAddress + constBufferAlignedSize, &constBuffer, sizeof(constBuffer));
+		memcpy(constBufferGPUAddress, &constantBufferData, sizeof(constantBufferData));
+		memcpy(constBufferGPUAddress + constBufferAlignedSize, &constantBufferData, sizeof(constantBufferData));
 		constBufferUploadHeap->Unmap(0, nullptr);
 
 	}
@@ -598,8 +598,8 @@ void DirectRenderer::LoadAssets()
 		tmpMat = XMMatrixLookAtLH(cPos, cTarg, cUp);
 		XMStoreFloat4x4(&cameraViewMat, tmpMat);
 
-		cubePos = XMFLOAT4(0.0f, -1.f, 0.0f, 0.0f); // set cube 1's position
-		XMVECTOR posVec = XMLoadFloat4(&cubePos); // create xmvector for cube1's position
+		cubePosition = XMFLOAT4(0.0f, -1.f, 0.0f, 0.0f); // set cube 1's position
+		XMVECTOR posVec = XMLoadFloat4(&cubePosition); // create xmvector for cube1's position
 
 		tmpMat = XMMatrixTranslationFromVector(posVec); // create translation matrix from cube1's position vector
 		XMStoreFloat4x4(&cubeRotMat, XMMatrixIdentity()); // initialize cube1's rotation matrix to identity matrix
@@ -635,7 +635,7 @@ void DirectRenderer::OnUpdate()
 	XMStoreFloat4x4(&cubeRotMat, rotMat);
 
 	// create translation matrix for cube 1 from cube 1's position vector
-	XMMATRIX translationMat = XMMatrixTranslationFromVector(XMLoadFloat4(&cubePos));
+	XMMATRIX translationMat = XMMatrixTranslationFromVector(XMLoadFloat4(&cubePosition));
 
 	XMMATRIX scaleMat = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	// create cube1's world matrix by first rotating the cube, then positioning the rotated cube
@@ -646,17 +646,17 @@ void DirectRenderer::OnUpdate()
 
 	// update constant buffer for cube1
 	// create the wvp matrix and store in constant buffer
-	XMMATRIX translationOffsetMat = XMMatrixTranslationFromVector(XMLoadFloat4(&cubePos));
+	XMMATRIX translationOffsetMat = XMMatrixTranslationFromVector(XMLoadFloat4(&cubePosition));
 	XMMATRIX viewMat = XMLoadFloat4x4(&cameraViewMat); // load view matrix
 	XMMATRIX projMat = XMLoadFloat4x4(&cameraProjMat); // load projection matrix
 	XMMATRIX wvpMat = XMLoadFloat4x4(&cubeWorldMat) * viewMat * projMat; // create wvp matrix
 	XMMATRIX transposed = XMMatrixTranspose(wvpMat); // must transpose wvp matrix for the gpu
-	XMStoreFloat4x4(&constBuffer.wvpMat, transposed); // store transposed wvp matrix in constant buffer
+	XMStoreFloat4x4(&constantBufferData.wvpMat, transposed); // store transposed wvp matrix in constant buffer
 
-	XMStoreFloat4x4(&constBuffer.worldMat, XMMatrixTranspose(worldMat));
+	XMStoreFloat4x4(&constantBufferData.worldMat, XMMatrixTranspose(worldMat));
 
 													  // copy our ConstantBuffer instance to the mapped constant buffer resource
-	memcpy(constBufferGPUAddress, &constBuffer, sizeof(constBuffer));
+	memcpy(constBufferGPUAddress, &constantBufferData, sizeof(constantBufferData));
 
 	// now do cube2's world matrix
 	// create rotation matrices for cube2
@@ -683,12 +683,12 @@ void DirectRenderer::OnUpdate()
 
 	wvpMat = XMLoadFloat4x4(&cube2WorldMat) * viewMat * projMat; // create wvp matrix
 	transposed = XMMatrixTranspose(wvpMat); // must transpose wvp matrix for the gpu
-	XMStoreFloat4x4(&constBuffer.wvpMat, transposed); // store transposed wvp matrix in constant buffer
+	XMStoreFloat4x4(&constantBufferData.wvpMat, transposed); // store transposed wvp matrix in constant buffer
 	
-	XMStoreFloat4x4(&constBuffer.worldMat, XMMatrixTranspose(worldMat));
+	XMStoreFloat4x4(&constantBufferData.worldMat, XMMatrixTranspose(worldMat));
 
 													  // copy our ConstantBuffer instance to the mapped constant buffer resource
-	memcpy(constBufferGPUAddress + constBufferAlignedSize, &constBuffer, sizeof(constBuffer));
+	memcpy(constBufferGPUAddress + constBufferAlignedSize, &constantBufferData, sizeof(constantBufferData));
 
 	// store cube2's world matrix
 	XMStoreFloat4x4(&cube2WorldMat, worldMat);

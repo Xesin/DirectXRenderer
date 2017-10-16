@@ -9,9 +9,6 @@
 //
 //*********************************************************
 
-//Texture2D g_texture;
-//SamplerState g_sampler;
-
 struct PSInput
 {
     float4 position : SV_POSITION;
@@ -25,8 +22,6 @@ SamplerState g_sampler : register(s0);
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
-    //return g_texture.Sample(g_sampler, input.uv);
-    //return input.color;
     float light = dot(float3(1.0, 0.0, -0.75), input.normal.xyz);
     return g_texture.Sample(g_sampler, input.uv) * light;
 }

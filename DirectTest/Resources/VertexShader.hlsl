@@ -18,8 +18,6 @@ cbuffer AppConstBuffer : register(b0)
 {
     float4x4 wvpMat;
 	float4x4 worldMat;
-    // now pad the constant buffer to be 256 byte aligned
-    //float4 padding[48];
 }
 
 PSInput VSMain(VSInput input)
