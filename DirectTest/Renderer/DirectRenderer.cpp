@@ -24,21 +24,21 @@ void DirectRenderer::Initialize()
 	LoadAssets();
 }
 
-// Load the rendering pipeline dependencies.
+// Cargar las dependencias de la rendering pipeline
 void DirectRenderer::LoadPipeline()
 {
 	UINT dxgiFactoryFlags = 0;
 
 #if defined(_DEBUG)
-	// Enable the debug layer (requires the Graphics Tools "optional feature").
-	// NOTE: Enabling the debug layer after device creation will invalidate the active device.
+	// Activamos el debug layer 
+	// NOTE: Activar el debug layer después de la creación del device invalidará el device activo.
 	{
 		ComPtr<ID3D12Debug> debugController;
 		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
 		{
 			debugController->EnableDebugLayer();
 
-			// Enable additional debug layers.
+			// Activar capas de debug adicionales.
 			dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 		}
 	}
