@@ -24,6 +24,6 @@ float4 PSMain(PSInput input) : SV_TARGET
 {
     //return g_texture.Sample(g_sampler, input.uv);
     //return input.color;
-	float light = max(0.0, (dot(float3(1.0, 0.0, 0.5), input.normal)));
-    return float4(input.normal, 1.0);
+    float light = dot(float3(1.0, 0.0, -0.75), input.normal.xyz);
+    return float4(light, light, light, 1.0);
 }

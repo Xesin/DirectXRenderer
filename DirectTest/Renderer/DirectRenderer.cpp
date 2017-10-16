@@ -202,8 +202,8 @@ void DirectRenderer::LoadAssets()
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12+8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0,  DXGI_FORMAT_R32G32B32_FLOAT, 0, 12+8+16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12 + 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0,  DXGI_FORMAT_R32G32B32_FLOAT, 0, 12 +8+16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
 	// fill out an input layout description structure
@@ -267,44 +267,44 @@ void DirectRenderer::LoadAssets()
 		// a triangle
 		Vertex vList[] = {
 			// front face (closer to camera)
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f} },
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } },
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } },
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { -1.0f, 1.0f, -1.0f} },
+			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, -1.0f, -1.0f } },
+			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f } },
+			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, -1.0f } },
 
 			// right side face
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f} },
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } , { 1.0f, 0.0f, 0.0f}},
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f} },
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f} },
+			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, -1.0f, -1.0f} },
+			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } , { 1.0f, 1.0f, 1.0f}},
+			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, -1.0f, 1.0f} },
+			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, -1.0f} },
 
 
 			// left side face
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f }, { -1.0f, 0.0f, 0.0f } },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f }, { -1.0f, 0.0f, 0.0f} },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, 0.0f, 0.0f}},
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, 0.0f, 0.0f}},
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f }, { -1.0f, 1.0f, 1.0f } },
+			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f }, { -1.0f, -1.0f, -1.0f} },
+			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, -1.0f, 1.0f}},
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, 1.0f, -1.0f}},
 
 
 			// back face
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f } ,{ 0.0f, 0.0f, -1.0f } },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, -1.0f} },
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { 0.0f, 0.0f, -1.0f }},
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { 0.0f, 0.0f, -1.0f }},
+			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f } ,{ 1.0f, 1.0f, 1.0f } },
+			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f }, { -1.0f, -1.0f, 1.0f} },
+			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { 1.0f, -1.0f, 1.0f }},
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, 1.0f, 1.0f }},
 
 
 			// top face
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f} },
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } , { 0.0f, 1.0f, 0.0f}},
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f} },
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f} },
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f }, { -1.0f, 1.0f, -1.0f} },
+			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } , { 1.0f, 1.0f, 1.0f}},
+			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, -1.0f} },
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { -1.0f, 1.0f, 1.0f} },
 
 
 			// bottom face
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },{ 0.0f, -1.0f, 0.0f } },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, -1.0f, 0.0f} },
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { 0.0f, -1.0f, 0.0f}},
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { 0.0f, -1.0f, 0.0f}},
+			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },{ 1.0f, -1.0f, 1.0f } },
+			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f }, { -1.0f, -1.0f, -1.0f} },
+			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { 1.0f, -1.0f, -1.0f}},
+			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, -1.0f, 1.0f}},
 
 		};
 
@@ -479,6 +479,9 @@ void DirectRenderer::LoadAssets()
 
 		ZeroMemory(&constBuffer, sizeof(AppBuffer));
 
+		XMStoreFloat4x4(&constBuffer.wvpMat, XMMatrixTranspose(XMMatrixIdentity()));
+		XMStoreFloat4x4(&constBuffer.worldMat, XMMatrixTranspose(XMMatrixIdentity()));
+
 		CD3DX12_RANGE readRange(0, 0);    // We do not intend to read from this resource on the CPU. (End is less than or equal to begin)
 		hr = constBufferUploadHeap->Map(0, &readRange, reinterpret_cast<void**>(&constBufferGPUAddress));
 		memcpy(constBufferGPUAddress, &constBuffer, sizeof(constBuffer));
@@ -503,14 +506,14 @@ void DirectRenderer::LoadAssets()
 		tmpMat = XMMatrixLookAtLH(cPos, cTarg, cUp);
 		XMStoreFloat4x4(&cameraViewMat, tmpMat);
 
-		cubePos = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f); // set cube 1's position
+		cubePos = XMFLOAT4(0.0f, -1.f, 0.0f, 0.0f); // set cube 1's position
 		XMVECTOR posVec = XMLoadFloat4(&cubePos); // create xmvector for cube1's position
 
 		tmpMat = XMMatrixTranslationFromVector(posVec); // create translation matrix from cube1's position vector
 		XMStoreFloat4x4(&cubeRotMat, XMMatrixIdentity()); // initialize cube1's rotation matrix to identity matrix
 		XMStoreFloat4x4(&cubeWorldMat, tmpMat); // store cube1's world matrix
 
-		cube2Pos = XMFLOAT4(1.5f, 0.0f, -1.0f, 0.0f); // set cube 1's position
+		cube2Pos = XMFLOAT4(1.5f, -1.f, 0.0f, 0.0f); // set cube 1's position
 		XMVECTOR pos2Vec = XMLoadFloat4(&cube2Pos); // create xmvector for cube1's position
 
 		tmpMat = XMMatrixTranslationFromVector(pos2Vec); // create translation matrix from cube1's position vector
@@ -531,12 +534,12 @@ void DirectRenderer::OnUpdate()
 	// update app logic, such as moving the camera or figuring out what objects are in view
 
 	// create rotation matrices
-	XMMATRIX rotXMat = XMMatrixRotationX(0.000f);
-	XMMATRIX rotYMat = XMMatrixRotationY(0.00f);
-	XMMATRIX rotZMat = XMMatrixRotationZ(0.003f);
+	XMMATRIX rotXMat = XMMatrixRotationX(0.004f);
+	XMMATRIX rotYMat = XMMatrixRotationY(0.003f);
+	XMMATRIX rotZMat = XMMatrixRotationZ(0.002f);
 
 	// add rotation to cube1's rotation matrix and store it
-	XMMATRIX rotMat = XMLoadFloat4x4(&cubeRotMat) * rotXMat * rotZMat * rotYMat;
+	XMMATRIX rotMat = XMLoadFloat4x4(&cubeRotMat) * rotXMat * rotYMat * rotZMat;
 	XMStoreFloat4x4(&cubeRotMat, rotMat);
 
 	// create translation matrix for cube 1 from cube 1's position vector
@@ -558,23 +561,23 @@ void DirectRenderer::OnUpdate()
 	XMMATRIX transposed = XMMatrixTranspose(wvpMat); // must transpose wvp matrix for the gpu
 	XMStoreFloat4x4(&constBuffer.wvpMat, transposed); // store transposed wvp matrix in constant buffer
 
-	XMStoreFloat4x4(&constBuffer.objectToWorldNormal, XMMatrixTranspose(XMMatrixInverse(nullptr, worldMat)));
+	XMStoreFloat4x4(&constBuffer.worldMat, XMMatrixTranspose(worldMat));
 
 													  // copy our ConstantBuffer instance to the mapped constant buffer resource
 	memcpy(constBufferGPUAddress, &constBuffer, sizeof(constBuffer));
 
 	// now do cube2's world matrix
 	// create rotation matrices for cube2
-	rotXMat = XMMatrixRotationX(0.00f);
-	rotYMat = XMMatrixRotationY(0.00f);
-	rotZMat = XMMatrixRotationZ(0.003f);
+	rotXMat = XMMatrixRotationX(0.002f);
+	rotYMat = XMMatrixRotationY(0.003f);
+	rotZMat = XMMatrixRotationZ(0.001f);
 
 	// add rotation to cube2's rotation matrix and store it
-	rotMat = rotZMat * (XMLoadFloat4x4(&cube2RotMat) * (rotXMat * rotYMat));
+	rotMat = (XMLoadFloat4x4(&cube2RotMat) * (rotXMat * rotYMat * rotZMat));
 	XMStoreFloat4x4(&cube2RotMat, rotMat);
 
 	// create translation matrix for cube 2 to offset it from cube 1 (its position relative to cube1
-	translationOffsetMat = XMMatrixTranslationFromVector(XMLoadFloat4(&cube2Pos));
+	translationMat = XMMatrixTranslationFromVector(XMLoadFloat4(&cube2Pos));
 
 	// we want cube 2 to be half the size of cube 1, so we scale it by .5 in all dimensions
 	scaleMat = XMMatrixScaling(0.5f, 0.5f, 0.5f);
@@ -584,13 +587,13 @@ void DirectRenderer::OnUpdate()
 	// then we translate it. 
 	// then we rotate it. rotation always rotates around point 0,0,0
 	// finally we move it to cube 1's position, which will cause it to rotate around cube 1
-	worldMat = rotMat * scaleMat * translationOffsetMat * translationMat;
+	worldMat = rotMat * scaleMat * translationMat;
 
 	wvpMat = XMLoadFloat4x4(&cube2WorldMat) * viewMat * projMat; // create wvp matrix
 	transposed = XMMatrixTranspose(wvpMat); // must transpose wvp matrix for the gpu
 	XMStoreFloat4x4(&constBuffer.wvpMat, transposed); // store transposed wvp matrix in constant buffer
-
-	XMStoreFloat4x4(&constBuffer.objectToWorldNormal, XMMatrixTranspose(XMMatrixInverse(nullptr, worldMat)));
+	
+	XMStoreFloat4x4(&constBuffer.worldMat, XMMatrixTranspose(worldMat));
 
 													  // copy our ConstantBuffer instance to the mapped constant buffer resource
 	memcpy(constBufferGPUAddress + constBufferAlignedSize, &constBuffer, sizeof(constBuffer));

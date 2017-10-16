@@ -65,7 +65,7 @@ private:
 	struct AppBuffer
 	{
 		XMFLOAT4X4 wvpMat;
-		XMFLOAT4X4 objectToWorldNormal;
+		XMFLOAT4X4 worldMat;
 	};
 
 	ComPtr<ID3D12Resource> vertexBuffer;
