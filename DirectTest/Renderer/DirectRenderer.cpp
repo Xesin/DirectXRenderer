@@ -43,10 +43,11 @@ void DirectRenderer::LoadPipeline()
 		}
 	}
 #endif
-
+	//Permite crear objetos de la infraestructura DirectX
 	ComPtr<IDXGIFactory4> factory;
 	ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)));
 
+	//Info sobre warp adapter: https://msdn.microsoft.com/en-us/library/windows/desktop/gg615082(v=vs.85).aspx
 	if (useWarpDevice)
 	{
 		ComPtr<IDXGIAdapter> warpAdapter;
@@ -60,9 +61,11 @@ void DirectRenderer::LoadPipeline()
 	}
 	else
 	{
+		//Optenemos el adaptador de hardware (GPU)
 		ComPtr<IDXGIAdapter1> hardwareAdapter;
 		GetHardwareAdapter(factory.Get(), &hardwareAdapter);
 
+		//Creamos el device a partir del adaptador
 		ThrowIfFailed(D3D12CreateDevice(
 			hardwareAdapter.Get(),
 			D3D_FEATURE_LEVEL_12_0,
@@ -70,14 +73,14 @@ void DirectRenderer::LoadPipeline()
 		));
 	}
 
-	// Describe and create the command queue.
+	// Describir y crear la command queue.
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
 	ThrowIfFailed(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
 
-	// Describe and create the swap chain.
+	// Describir y crear la swap chain.
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 	swapChainDesc.BufferCount = FRAME_COUNT;
 	swapChainDesc.Width = width;
@@ -87,40 +90,45 @@ void DirectRenderer::LoadPipeline()
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapChainDesc.SampleDesc.Count = 1;
 
-	ComPtr<IDXGISwapChain1> swapChainInt;
+	ComPtr<IDXGISwapChain1> swapChainTmp;
 	ThrowIfFailed(factory->CreateSwapChainForHwnd(
-		commandQueue.Get(),		// Swap chain needs the queue so that it can force a flush on it.
+		commandQueue.Get(),
 		WinApplication::GetHwnd(),
 		&swapChainDesc,
 		nullptr,
 		nullptr,
-		&swapChainInt
+		&swapChainTmp
 	));
 
-	// This sample does not support fullscreen transitions.
-	ThrowIfFailed(factory->MakeWindowAssociation(WinApplication::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
+	//Hacemos la asociación a la ventana para poder representar lo que pintemos
+	ThrowIfFailed(factory->MakeWindowAssociation(WinApplication::GetHwnd(), DXGI_MWA_VALID));
 
-	ThrowIfFailed(swapChainInt.As(&swapChain));
+	//Almacenamos el swap chain temporal en nuestro objeto definitivo
+	ThrowIfFailed(swapChainTmp.As(&swapChain));
+
+	//Guardamos el indice del back buffer
 	frameIndex = swapChain->GetCurrentBackBufferIndex();
 
-	// Create descriptor heaps.
+	// Creamos los descriptor heaps.
 	{
-		// Describe and create a render target view (RTV) descriptor heap.
+		// Describir y crear el render target view (RTV) descriptor heap.
 		D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
 		rtvHeapDesc.NumDescriptors = FRAME_COUNT;
 		rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 		rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		ThrowIfFailed(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)));
 
+		//Obtenemos su tamaño
 		rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-		D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
-		heapDesc.NumDescriptors = 1;
-		heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		ThrowIfFailed(device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&cbvHeap)));
+		// Describir y crear el constant buffer view (CBV) descriptor heap.
+		D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc = {};
+		cbvHeapDesc.NumDescriptors = 1;
+		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		ThrowIfFailed(device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&cbvHeap)));
 
-		// Describe and create a shader resource view (SRV) heap for the texture.
+		// Describir y crear el shader resource view (SRV) descriptor heap.
 		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
 		srvHeapDesc.NumDescriptors = 1;
 		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -132,51 +140,55 @@ void DirectRenderer::LoadPipeline()
 	{
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart());
 
-		// Create a RTV and a command allocator for each frame.
+		// Crear un RenderTarget y un command allocator por cada frame
 		for (UINT n = 0; n < FRAME_COUNT; n++)
 		{
+			//Obtenemos el buffer
 			ThrowIfFailed(swapChain->GetBuffer(n, IID_PPV_ARGS(&renderTargets[n])));
+
+			//Creamos el render target sobre y lo almacenamos en el buffer
 			device->CreateRenderTargetView(renderTargets[n].Get(), nullptr, rtvHandle);
+			//Hacemos un offset de la memoria
 			rtvHandle.Offset(1, rtvDescriptorSize);
 
+			//Creamos el command allocator
 			ThrowIfFailed(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocators[n])));
 		}
 	}
 }
 
-// Load the sample assets.
+// Cargar los assets para el ejemplo.
 void DirectRenderer::LoadAssets()
 {
-	HRESULT hr;
-	// create a root descriptor, which explains where to find the data for this root parameter
+	// Crear un root descriptor, indica donde encontrar los datos para este parametro
 	D3D12_ROOT_DESCRIPTOR rootCBVDescriptor;
 	rootCBVDescriptor.RegisterSpace = 0;
 	rootCBVDescriptor.ShaderRegister = 0;
 
-	// create a descriptor range (descriptor table) and fill it out
-	// this is a range of descriptors inside a descriptor heap
-	D3D12_DESCRIPTOR_RANGE  descriptorTableRanges[1]; // only one range right now
-	descriptorTableRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // this is a range of shader resource views (descriptors)
-	descriptorTableRanges[0].NumDescriptors = 1; // we only have one texture right now, so the range is only 1
-	descriptorTableRanges[0].BaseShaderRegister = 0; // start index of the shader registers in the range
-	descriptorTableRanges[0].RegisterSpace = 0; // space 0. can usually be zero
-	descriptorTableRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // this appends the range to the end of the root signature descriptor tables
+	// Crear el descriptor range y rellenarlo
+	D3D12_DESCRIPTOR_RANGE  descriptorTableRanges[1]; // Por ahora solo un range
+	descriptorTableRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // Es del tipo shader resource views (descriptors)
+	descriptorTableRanges[0].NumDescriptors = 1; // Por ahora solo tenemos una textura
+	descriptorTableRanges[0].BaseShaderRegister = 0; // Indice de inicio del shader
+	descriptorTableRanges[0].RegisterSpace = 0; // normalmente puede ser 0
+	descriptorTableRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Esto añade el range al final del root signature descriptor tables
 
-																									   // create a descriptor table
+	// Crear un descriptor table
 	D3D12_ROOT_DESCRIPTOR_TABLE descriptorTable;
-	descriptorTable.NumDescriptorRanges = _countof(descriptorTableRanges); // we only have one range
-	descriptorTable.pDescriptorRanges = &descriptorTableRanges[0]; // the pointer to the beginning of our ranges array
+	descriptorTable.NumDescriptorRanges = _countof(descriptorTableRanges);
+	descriptorTable.pDescriptorRanges = &descriptorTableRanges[0]; // puntero al principio de nuestros ranges
 
-																   // create a root parameter for the root descriptor and fill it out
-	D3D12_ROOT_PARAMETER  rootParameters[2]; // two root parameters
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // this is a constant buffer view root descriptor
-	rootParameters[0].Descriptor = rootCBVDescriptor; // this is the root descriptor for this root parameter
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // our pixel shader will be the only shader accessing this parameter for now
+	// crear un root parameter para el root descriptor y rellenarlo
+	D3D12_ROOT_PARAMETER  rootParameters[2]; // dos root parameters
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // Es primero es de tipo constant buffer
+	rootParameters[0].Descriptor = rootCBVDescriptor; // este es el root descriptor para este parametro
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // la visibilidad de este parametro es por vertice
 
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // this is a descriptor table
-	rootParameters[1].DescriptorTable = descriptorTable; // this is our descriptor table for this root parameter
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // our pixel shader will be the only shader accessing this parameter for now
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // El segundo parametro es de tipo descriptor table
+	rootParameters[1].DescriptorTable = descriptorTable; // Este es nuestro descriptor table
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // la visibilidad de este parametro es por pixel
 
+	//Creamos un sampler desc para nuestro sampler estatico
 	D3D12_STATIC_SAMPLER_DESC sampler = {};
 	sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
 	sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -192,41 +204,38 @@ void DirectRenderer::LoadAssets()
 	sampler.RegisterSpace = 0;
 	sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
+	//Creamos el root signature description y el root signature
 	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init(_countof(rootParameters), // we have 1 root parameter
-		rootParameters, // a pointer to the beginning of our root parameters array
-		1,
-		&sampler,
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | // we can deny shader stages here for better performance
+	rootSignatureDesc.Init(_countof(rootParameters),
+		rootParameters,
+		1, //Tenemos un sampler estatico
+		&sampler, //puntero a nuestro sampler description
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | //Podemos denegar el acceso a ciertas etapas para mejor rendimiento
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS);
 
 	ID3DBlob* signature;
-	hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr);
-	if (FAILED(hr))
-	{
-		return;
-	}
 
-	hr = device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
-	if (FAILED(hr))
-	{
-		return;
-	}
+	//Comprobamos que se puede deserializar (para saber si es correcta)
+	ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr));
 
+	//Creamos el root signature
+	ThrowIfFailed(device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
+
+
+	//Cargamos los shaders previamente compilados por el compilador de HLSL
 	UINT8* pVertexShaderData;
 	UINT vertexShaderDataLength;
 	UINT8* pPixelShaderData;
 	UINT pixelShaderDataLength;
 
+	//Cargamos el vertex shader
 	ThrowIfFailed(ReadDataFromFile(L"Resources/VertexShader.cso", &pVertexShaderData, &vertexShaderDataLength));
+	//Cargamos el pixel shader
 	ThrowIfFailed(ReadDataFromFile(L"Resources/PixelShader.cso", &pPixelShaderData, &pixelShaderDataLength));
 
-	// create input layout
-
-	// The input layout is used by the Input Assembler so that it knows
-	// how to read the vertex data bound to it.
+	// Creamos el input layout, esto describe el input que espera tener el vertex shader
 
 	D3D12_INPUT_ELEMENT_DESC inputLayout[] =
 	{
@@ -236,55 +245,48 @@ void DirectRenderer::LoadAssets()
 		{ "NORMAL", 0,  DXGI_FORMAT_R32G32B32_FLOAT, 0, 12 +8+16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
-	// fill out an input layout description structure
+	// Creamos el input layout description
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc = {};
 
 	// we can get the number of elements in an array by "sizeof(array) / sizeof(arrayElementType)"
 	inputLayoutDesc.NumElements = sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC);
 	inputLayoutDesc.pInputElementDescs = inputLayout;
 
-	// create a pipeline state object (PSO)
+	// Creamos un pipeline state object (PSO)
 
-	// In a real application, you will have many pso's. for each different shader
-	// or different combinations of shaders, different blend states or different rasterizer states,
-	// different topology types (point, line, triangle, patch), or a different number
-	// of render targets you will need a pso
-
-	// VS is the only required shader for a pso. You might be wondering when a case would be where
-	// you only set the VS. It's possible that you have a pso that only outputs data with the stream
-	// output, and not on a render target, which means you would not need anything after the stream
-	// output.
-
+	//Tenemos un sampler
 	DXGI_SAMPLE_DESC sampleDesc = {};
 	sampleDesc.Count = 1;
 
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {}; // a structure to define a pso
-	psoDesc.InputLayout = inputLayoutDesc; // the structure describing our input layout
-	psoDesc.pRootSignature = rootSignature.Get(); // the root signature that describes the input data this pso needs
+	//Creamos y rellenamos la descripción del PSO
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {}; 
+	psoDesc.InputLayout = inputLayoutDesc;
+	psoDesc.pRootSignature = rootSignature.Get();
 	psoDesc.VS = CD3DX12_SHADER_BYTECODE(pVertexShaderData, vertexShaderDataLength);
 	psoDesc.PS = CD3DX12_SHADER_BYTECODE(pPixelShaderData, pixelShaderDataLength);
-	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // type of topology we are drawing
-	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // format of the render target
-	psoDesc.SampleDesc = sampleDesc; // must be the same sample description as the swapchain and depth/stencil buffer
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // Tipo de topologia a dibujar
+	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // formato del render target
+	psoDesc.SampleDesc = sampleDesc;
 	psoDesc.SampleMask = 0xffffffff; // sample mask has to do with multi-sampling. 0xffffffff means point sampling is done
-	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT); // a default rasterizer state.
-	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT); // a default blent state.
-	psoDesc.NumRenderTargets = 1; // we are only binding one render target
+	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	psoDesc.NumRenderTargets = 1; // solo vinculamos un render target
 	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 
-								  // create the pso
+	//Crear el PSO
 	ThrowIfFailed(device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState)));
 
-	// Create the command list.
+	// Crear el command list
 	ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[frameIndex].Get(), pipelineState.Get(), IID_PPV_ARGS(&commandList)));
 
-	// Create synchronization objects and wait until assets have been uploaded to the GPU.
+	// Crear los objetos de sincronización
 	{
+		//Evento de la barrera
 		ThrowIfFailed(device->CreateFence(fenceValues[frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
 		fenceValues[frameIndex]++;
 
-		// Create an event handle to use for frame synchronization.
+		//Creamos el evento que se usa para la sincronización.
 		fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 		if (fenceEvent == nullptr)
 		{
@@ -292,45 +294,46 @@ void DirectRenderer::LoadAssets()
 		}
 	}
 
-	// Create vertex buffer
+	// Crear el vertex buffer y el index buffer
 	{
-		// a triangle
+		// Creamos la lista de vertices que necesita el cubo
 		Vertex vList[] = {
-			// front face (closer to camera)
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { -1.0f, 1.0f, -1.0f} },
+			// Cara delantera (cerca de la camara)
+			//{posX, posY, poxZ}, {u,v}, {r, g, b, a}, {x, y, z} (posicion, UVs, color, normales (Smooth))
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { -1.0f, 1.0f, -1.0f} }, 
 			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, -1.0f, -1.0f } },
 			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f } },
 			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, -1.0f } },
 
-			// right side face
+			// Cara derecha
 			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, -1.0f, -1.0f} },
 			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } , { 1.0f, 1.0f, 1.0f}},
 			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, -1.0f, 1.0f} },
 			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, -1.0f} },
 
 
-			// left side face
+			// cara izquierda
 			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f }, { -1.0f, 1.0f, 1.0f } },
 			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f }, { -1.0f, -1.0f, -1.0f} },
 			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, -1.0f, 1.0f}},
 			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, 1.0f, -1.0f}},
 
 
-			// back face
+			// Cara trasera
 			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f } ,{ 1.0f, 1.0f, 1.0f } },
 			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f }, { -1.0f, -1.0f, 1.0f} },
 			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { 1.0f, -1.0f, 1.0f }},
 			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, 1.0f, 1.0f }},
 
 
-			// top face
+			// Cara de arriba
 			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f }, { -1.0f, 1.0f, -1.0f} },
 			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } , { 1.0f, 1.0f, 1.0f}},
 			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, -1.0f} },
 			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { -1.0f, 1.0f, 1.0f} },
 
 
-			// bottom face
+			// Cara de abajo
 			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },{ 1.0f, -1.0f, 1.0f } },
 			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f }, { -1.0f, -1.0f, -1.0f} },
 			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { 1.0f, -1.0f, -1.0f}},
@@ -338,128 +341,124 @@ void DirectRenderer::LoadAssets()
 
 		};
 
-		// a triangle
+		// Lista de indices, indica que vertices van unidos
 		DWORD iList[] = {
-			// ffront face
-			0, 1, 2, // first triangle
-			0, 3, 1, // second triangle
+			// Cara delantera
+			0, 1, 2, // primer triangulo
+			0, 3, 1, // segundo triangulo
 
-			// left face
-			4, 5, 6, // first triangle
-			4, 7, 5, // second triangle
+			// Cara izquierda
+			4, 5, 6, // primer triangulo
+			4, 7, 5, // segundo triangulo
 
-			// right face
-			8, 9, 10, // first triangle
-			8, 11, 9, // second triangle
+			// Cara derecha
+			8, 9, 10, // primer triangulo
+			8, 11, 9, // segundo triangulo
 
-			// back face
-			12, 13, 14, // first triangle
-			12, 15, 13, // second triangle
+			// Cara trasera
+			12, 13, 14, // primer triangulo
+			12, 15, 13, // segundo triangulo
 
-			// top face
-			16, 17, 18, // first triangle
-			16, 19, 17, // second triangle
+			// Cara de arriba
+			16, 17, 18, // primer triangulo
+			16, 19, 17, // segundo triangulo
 
-			// bottom face
-			20, 21, 22, // first triangle
-			20, 23, 21, // second triangle
+			// Cara de abajo
+			20, 21, 22, // primer triangulo
+			20, 23, 21, // segundo triangulo
 		};
 
+		//Tamaño de los buffers
 		int vBufferSize = sizeof(vList);
 		int iBufferSize = sizeof(iList);
 
+		//Cantidad de indices de cada cubo
 		numCubeIndices = sizeof(iList) / sizeof(DWORD);
 
-		// create default heap to hold index buffer
+		// Crear el index buffer
 		device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), // a default heap
-			D3D12_HEAP_FLAG_NONE, // no flags
-			&CD3DX12_RESOURCE_DESC::Buffer(iBufferSize), // resource description for a buffer
-			D3D12_RESOURCE_STATE_COPY_DEST, // start in the copy destination state
-			nullptr, // optimized clear value must be null for this type of resource
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE, 
+			&CD3DX12_RESOURCE_DESC::Buffer(iBufferSize), 
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			nullptr,
 			IID_PPV_ARGS(&indexBuffer));
 
-		// we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
+		// Podemos ponerle un nombre al buffer y así debugear mejor
 		indexBuffer->SetName(L"Index Buffer Resource Heap");
 
-		// create upload heap to upload index buffer
+		// Crear un upload heap para cargar el index buffer
 		ID3D12Resource* iBufferUploadHeap;
 		device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
-			D3D12_HEAP_FLAG_NONE, // no flags
-			&CD3DX12_RESOURCE_DESC::Buffer(vBufferSize), // resource description for a buffer
-			D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE, 
+			&CD3DX12_RESOURCE_DESC::Buffer(iBufferSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ, // La GPU leera de este buffer y copiara los datos al otro buffer
 			nullptr,
 			IID_PPV_ARGS(&iBufferUploadHeap));
+
 		iBufferUploadHeap->SetName(L"Index Buffer Upload Resource Heap");
 
-		// store vertex buffer in upload heap
+		// Almacenar los datos del index buffer
 		D3D12_SUBRESOURCE_DATA indexData = {};
-		indexData.pData = reinterpret_cast<BYTE*>(iList); // pointer to our index array
-		indexData.RowPitch = iBufferSize; // size of all our index buffer
-		indexData.SlicePitch = iBufferSize; // also the size of our index buffer
+		indexData.pData = reinterpret_cast<BYTE*>(iList); // puntero a nuestro array
+		indexData.RowPitch = iBufferSize; // tamaño de nuestro array
+		indexData.SlicePitch = iBufferSize; // tamaño de nuestro array
 
-		// we are now creating a command with the command list to copy the data from
-		// the upload heap to the default heap
+		// Ahora creamo el command command list para copiar los datos desde
+		// el upload heap al default heap
 		UpdateSubresources<1>(commandList.Get(), indexBuffer.Get(), iBufferUploadHeap, 0, 0, 1, &indexData);
 
-		// transition the vertex buffer data from copy destination state to vertex buffer state
-		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
+		// Transición del index buffer desde copia a index buffer state
+		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER));
 
-		// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
+		// Crear el index buffer view. Obtenemos la posicion de memoria del index buffer mediante el GetGPUVirtualAddress()
 		indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
-		indexBufferView.Format = DXGI_FORMAT_R32_UINT; // 32-bit unsigned integer (this is what a dword is, double word, a word is 2 bytes)
+		indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 		indexBufferView.SizeInBytes = iBufferSize;
 
-		// create default heap
-		// default heap is memory on the GPU. Only the GPU has access to this memory
-		// To get data into this heap, we will have to upload the data using
-		// an upload heap
+		// Crear el default heap para el vertex buffer
 		device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), // a default heap
-			D3D12_HEAP_FLAG_NONE, // no flags
-			&CD3DX12_RESOURCE_DESC::Buffer(vBufferSize), // resource description for a buffer
-			D3D12_RESOURCE_STATE_COPY_DEST, // we will start this heap in the copy destination state since we will copy data
-											// from the upload heap to this heap
-			nullptr, // optimized clear value must be null for this type of resource. used for render targets and depth/stencil buffers
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), 
+			D3D12_HEAP_FLAG_NONE, 
+			&CD3DX12_RESOURCE_DESC::Buffer(vBufferSize),
+			D3D12_RESOURCE_STATE_COPY_DEST, 
+			nullptr, 
 			IID_PPV_ARGS(&vertexBuffer));
 
-		// we can give resource heaps a name so when we debug with the graphics debugger we know what resource we are looking at
 		vertexBuffer->SetName(L"Vertex Buffer Resource Heap");
 
-		// create upload heap
-		// upload heaps are used to upload data to the GPU. CPU can write to it, GPU can read from it
-		// We will upload the vertex buffer using this heap to the default heap
+		// Crear el upload heap para el vertex buffer
 		ID3D12Resource* vBufferUploadHeap;
 		device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 			D3D12_HEAP_FLAG_NONE, // no flags
-			&CD3DX12_RESOURCE_DESC::Buffer(vBufferSize), // resource description for a buffer
-			D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
+			&CD3DX12_RESOURCE_DESC::Buffer(vBufferSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
 			nullptr,
 			IID_PPV_ARGS(&vBufferUploadHeap));
+
 		vBufferUploadHeap->SetName(L"Vertex Buffer Upload Resource Heap");
 
-		// store vertex buffer in upload heap
+		// Guardamos el vertex buffer en el upload heap
 		D3D12_SUBRESOURCE_DATA vertexData = {};
-		vertexData.pData = reinterpret_cast<BYTE*>(vList); // pointer to our vertex array
-		vertexData.RowPitch = vBufferSize; // size of all our triangle vertex data
-		vertexData.SlicePitch = vBufferSize; // also the size of our triangle vertex data
+		vertexData.pData = reinterpret_cast<BYTE*>(vList);
+		vertexData.RowPitch = vBufferSize;
+		vertexData.SlicePitch = vBufferSize;
 
-											 // we are now creating a command with the command list to copy the data from
-											 // the upload heap to the default heap
+		//Copiamos los datos desde el upload heap al default heap
 		UpdateSubresources<1>(commandList.Get(), vertexBuffer.Get(), vBufferUploadHeap, 0, 0, 1, &vertexData);
 
-		// transition the vertex buffer data from copy destination state to vertex buffer state
+		// Transición del vertex buffer desde copia a vertex buffer state
 		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
 
-		// create a vertex buffer view for the triangle. We get the GPU memory address to the vertex pointer using the GetGPUVirtualAddress() method
+		// Crear el vertex buffer view. Obtenemos la posicion de memoria del index buffer mediante el GetGPUVirtualAddress()
 		vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
 		vertexBufferView.StrideInBytes = sizeof(Vertex);
 		vertexBufferView.SizeInBytes = vBufferSize;
 	}
 
-	//Create the depth/stencil
+	//Crear el depth/stencil
 	{
 		D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
 		dsvHeapDesc.NumDescriptors = 1;
@@ -477,6 +476,7 @@ void DirectRenderer::LoadAssets()
 		depthOptimizedClearValue.DepthStencil.Depth = 1.0f;
 		depthOptimizedClearValue.DepthStencil.Stencil = 0;
 
+		//Solo creamos un heap de tipo default ya que sólo vamos a escribir en el
 		device->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE,
@@ -487,13 +487,14 @@ void DirectRenderer::LoadAssets()
 		);
 		dsDescriptorHeap->SetName(L"Depth/Stencil Resource Heap");
 
+		//Creamos el stencil view
 		device->CreateDepthStencilView(depthStencilBuffer.Get(), &depthStencilDesc, dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 	}
 
 	ComPtr<ID3D12Resource> textureUploadHeap;
-	//Create the texture
+	//Creamos la textura
 	{
-		// Describe and create a Texture2D.
+		// Creamos la descripcion
 		D3D12_RESOURCE_DESC textureDesc = {};
 		textureDesc.MipLevels = 1;
 		textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -505,6 +506,7 @@ void DirectRenderer::LoadAssets()
 		textureDesc.SampleDesc.Quality = 0;
 		textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
+		//Mismo proceso que antes, primero un heap de tipo default
 		ThrowIfFailed(device->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE,
@@ -515,24 +517,21 @@ void DirectRenderer::LoadAssets()
 
 
 		UINT64 textureUploadBufferSize;
-		// this function gets the size an upload buffer needs to be to upload a texture to the gpu.
-		// each row must be 256 byte aligned except for the last row, which can just be the size in bytes of the row
-		// eg. textureUploadBufferSize = ((((width * numBytesPerPixel) + 255) & ~255) * (height - 1)) + (width * numBytesPerPixel);
-		//textureUploadBufferSize = (((imageBytesPerRow + 255) & ~255) * (textureDesc.Height - 1)) + imageBytesPerRow;
+		
+		//Esta funcion obtiene el tamaño del buffer que necesitamos
 		device->GetCopyableFootprints(&textureDesc, 0, 1, 0, nullptr, nullptr, nullptr, &textureUploadBufferSize);
 
-		// now we create an upload heap to upload our texture to the GPU
-		hr = device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
-			D3D12_HEAP_FLAG_NONE, // no flags
-			&CD3DX12_RESOURCE_DESC::Buffer(textureUploadBufferSize), // resource description for a buffer (storing the image data in this heap just to copy to the default heap)
-			D3D12_RESOURCE_STATE_GENERIC_READ, // We will copy the contents from this heap to the default heap above
+		// Ahora podemos crear el upload heap
+		ThrowIfFailed(device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE, 
+			&CD3DX12_RESOURCE_DESC::Buffer(textureUploadBufferSize), 
+			D3D12_RESOURCE_STATE_GENERIC_READ, 
 			nullptr,
-			IID_PPV_ARGS(&textureUploadHeap));
+			IID_PPV_ARGS(&textureUploadHeap)));
 		textureUploadHeap->SetName(L"Texture Buffer Upload Resource Heap");
 
-		// Copy data to the intermediate upload heap and then schedule a copy 
-		// from the upload heap to the Texture2D.
+		//Generamos los datos de la textura
 		std::vector<UINT8> texture = GenerateTextureData();
 
 		D3D12_SUBRESOURCE_DATA textureData = {};
@@ -540,10 +539,12 @@ void DirectRenderer::LoadAssets()
 		textureData.RowPitch = 512 * 4;
 		textureData.SlicePitch = textureData.RowPitch * 512;
 
+		//Copiamos la textura al default heap
 		UpdateSubresources(commandList.Get(), textureBuffer.Get(), textureUploadHeap.Get(), 0, 0, 1, &textureData);
+
 		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(textureBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
 
-		// Describe and create a SRV for the texture.
+		// Describimos y creamos el SRV para la textura
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srvDesc.Format = textureDesc.Format;
@@ -552,161 +553,171 @@ void DirectRenderer::LoadAssets()
 		device->CreateShaderResourceView(textureBuffer.Get(), &srvDesc, srvHeap->GetCPUDescriptorHandleForHeapStart());
 	}
 
-	// Now we execute the command list to upload the initial assets (triangle data)
-	commandList->Close();
-	ID3D12CommandList* ppCommandLists[] = { commandList.Get() };
-	commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-
-	//Create the constant buffer
+	//Creamos el constant buffer
 	{
+
+		//Como es un dato que se actualiza constantemente, solo creamos un upload heap
 		device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // this heap will be used to upload the constant buffer data
-			D3D12_HEAP_FLAG_NONE, // no flags
-			&CD3DX12_RESOURCE_DESC::Buffer(1024 * 64), // size of the resource heap. Must be a multiple of 64KB for single-textures and constant buffers
-			D3D12_RESOURCE_STATE_GENERIC_READ, // will be data that is read from so we keep it in the generic read state
-			nullptr, // we do not have use an optimized clear value for constant buffers
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), 
+			D3D12_HEAP_FLAG_NONE, 
+			&CD3DX12_RESOURCE_DESC::Buffer(1024 * 64), // Tamaño del buffer.Tiene que ser un multiplo de 64KB para una textura o constant buffer
+			D3D12_RESOURCE_STATE_GENERIC_READ, 
+			nullptr,
 			IID_PPV_ARGS(&constBufferUploadHeap));
 
 		constBufferUploadHeap->SetName(L"Constant Buffer Upload Resource Heap");
 
 		ZeroMemory(&constantBufferData, sizeof(AppBuffer));
 
+		//Asignamos los datos
 		XMStoreFloat4x4(&constantBufferData.wvpMat, XMMatrixTranspose(XMMatrixIdentity()));
 		XMStoreFloat4x4(&constantBufferData.worldMat, XMMatrixTranspose(XMMatrixIdentity()));
 
-		CD3DX12_RANGE readRange(0, 0);    // We do not intend to read from this resource on the CPU. (End is less than or equal to begin)
-		hr = constBufferUploadHeap->Map(0, &readRange, reinterpret_cast<void**>(&constBufferGPUAddress));
+		CD3DX12_RANGE readRange(0, 0);    // No tenemos intencion de leer estos datos desde la CPU.
+
+		//Mapeamos para obtener la dirección de memoria del buffer en la GPU
+		ThrowIfFailed(constBufferUploadHeap->Map(0, &readRange, reinterpret_cast<void**>(&constBufferGPUAddress)));
+
+		//Copiamos los datos a esa dirección de memoria
 		memcpy(constBufferGPUAddress, &constantBufferData, sizeof(constantBufferData));
+		//Volvemos a hacer lo mismo para tener dos buffers alineados
 		memcpy(constBufferGPUAddress + constBufferAlignedSize, &constantBufferData, sizeof(constantBufferData));
 		constBufferUploadHeap->Unmap(0, nullptr);
 
 	}
 
-	//Build projection and view matrix
+	//Crear los view y projection matrix
 	{
+		//Matrix de perspectiva
 		XMMATRIX tmpMat = XMMatrixPerspectiveFovLH(60.0f*(3.14f / 180.0f), (float)width / (float)height, 0.1f, 1000.0f);
+
+		//Asignamos el projection matrix
 		XMStoreFloat4x4(&cameraProjMat, tmpMat);
-		// set starting camera state
+
+		// Set de la camara
 		cameraPosition = XMFLOAT4(0.0f, 0.0f, -4.0f, 0.0f);
 		cameraTarget = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 		cameraUp = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
-		// build view matrix
+		// Creamos el view matrix
 		XMVECTOR cPos = XMLoadFloat4(&cameraPosition);
 		XMVECTOR cTarg = XMLoadFloat4(&cameraTarget);
 		XMVECTOR cUp = XMLoadFloat4(&cameraUp);
+
 		tmpMat = XMMatrixLookAtLH(cPos, cTarg, cUp);
+
+		//Asignamos el view matrix
 		XMStoreFloat4x4(&cameraViewMat, tmpMat);
 
-		cubePosition = XMFLOAT4(0.0f, -1.f, 0.0f, 0.0f); // set cube 1's position
-		XMVECTOR posVec = XMLoadFloat4(&cubePosition); // create xmvector for cube1's position
 
-		tmpMat = XMMatrixTranslationFromVector(posVec); // create translation matrix from cube1's position vector
-		XMStoreFloat4x4(&cubeRotMat, XMMatrixIdentity()); // initialize cube1's rotation matrix to identity matrix
-		XMStoreFloat4x4(&cubeWorldMat, tmpMat); // store cube1's world matrix
+		cubePosition = XMFLOAT4(0.0f, -1.f, 0.0f, 0.0f); // asignamos la posición del cubo 1
+		XMVECTOR posVec = XMLoadFloat4(&cubePosition); // Creamos un XM Vector
 
-		cube2Pos = XMFLOAT4(1.5f, -1.f, 0.0f, 0.0f); // set cube 1's position
-		XMVECTOR pos2Vec = XMLoadFloat4(&cube2Pos); // create xmvector for cube1's position
+		tmpMat = XMMatrixTranslationFromVector(posVec); // crear el matrix de translacion
+		XMStoreFloat4x4(&cubeRotMat, XMMatrixIdentity()); // inicializar el matrix de rotación
+		XMStoreFloat4x4(&cubeWorldMat, tmpMat); // guardar el world matrix del cubo 1
 
-		tmpMat = XMMatrixTranslationFromVector(pos2Vec); // create translation matrix from cube1's position vector
-		XMStoreFloat4x4(&cube2RotMat, XMMatrixIdentity()); // initialize cube1's rotation matrix to identity matrix
-		XMStoreFloat4x4(&cube2WorldMat, tmpMat); // store cube1's world matrix
+		cube2Pos = XMFLOAT4(1.5f, -1.f, 0.0f, 0.0f); // asignamos la posición del cubo 2
+		XMVECTOR pos2Vec = XMLoadFloat4(&cube2Pos); // Creamos un XM Vector
+
+		tmpMat = XMMatrixTranslationFromVector(pos2Vec);  // crear el matrix de translacion
+		XMStoreFloat4x4(&cube2RotMat, XMMatrixIdentity()); // inicializar el matrix de rotación
+		XMStoreFloat4x4(&cube2WorldMat, tmpMat); // guardar el world matrix del cubo 1
 	}
 
-	// Wait for the command list to execute; we are reusing the same command 
-	// list in our main loop but for now, we just want to wait for setup to 
-	// complete before continuing.
+	// Ahora ejecutamos el command list para cargar los assets
+	commandList->Close();
+	ID3D12CommandList* ppCommandLists[] = { commandList.Get() };
+	commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+	//Esperamos a que todos los comandos acaben de ejecutarse para continuar
 	WaitForGpu();
 
 }
 
-// Update frame-based values.
 void DirectRenderer::OnUpdate()
 {
-	// update app logic, such as moving the camera or figuring out what objects are in view
-
-	// create rotation matrices
+	// Crear matrices de rotación
 	XMMATRIX rotXMat = XMMatrixRotationX(0.004f);
 	XMMATRIX rotYMat = XMMatrixRotationY(0.003f);
 	XMMATRIX rotZMat = XMMatrixRotationZ(0.002f);
 
-	// add rotation to cube1's rotation matrix and store it
+	// Añadimos la rotacion a la que ya tenia el cubo 1
 	XMMATRIX rotMat = XMLoadFloat4x4(&cubeRotMat) * rotXMat * rotYMat * rotZMat;
 	XMStoreFloat4x4(&cubeRotMat, rotMat);
 
-	// create translation matrix for cube 1 from cube 1's position vector
+	//Crear el matrix de traslacion a partir de la posicion del cubo 1
 	XMMATRIX translationMat = XMMatrixTranslationFromVector(XMLoadFloat4(&cubePosition));
 
+	//Crear un matrix de escala para el cubo 1
+
 	XMMATRIX scaleMat = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	// create cube1's world matrix by first rotating the cube, then positioning the rotated cube
+
+	// Creamos el world matrix para el cubo 1, primero realizamos la rotación para que sea en base al centro del objeto
 	XMMATRIX worldMat = rotMat * translationMat * scaleMat;
 
-	// store cube1's world matrix
+	// guardamos el world matrix del cubo uno
 	XMStoreFloat4x4(&cubeWorldMat, worldMat);
 
-	// update constant buffer for cube1
-	// create the wvp matrix and store in constant buffer
+	// actualizar el constant buffer para el cubo 1
+	// crear el mvp matrix y guardarlo en el constant buffer
 	XMMATRIX translationOffsetMat = XMMatrixTranslationFromVector(XMLoadFloat4(&cubePosition));
 	XMMATRIX viewMat = XMLoadFloat4x4(&cameraViewMat); // load view matrix
 	XMMATRIX projMat = XMLoadFloat4x4(&cameraProjMat); // load projection matrix
-	XMMATRIX wvpMat = XMLoadFloat4x4(&cubeWorldMat) * viewMat * projMat; // create wvp matrix
-	XMMATRIX transposed = XMMatrixTranspose(wvpMat); // must transpose wvp matrix for the gpu
-	XMStoreFloat4x4(&constantBufferData.wvpMat, transposed); // store transposed wvp matrix in constant buffer
+	XMMATRIX wvpMat = XMLoadFloat4x4(&cubeWorldMat) * viewMat * projMat; // crear wvp matrix
+	XMMATRIX transposed = XMMatrixTranspose(wvpMat); // se debe pasar la transpuesta del wvp matrix para la gpu
+	XMStoreFloat4x4(&constantBufferData.wvpMat, transposed); // guardamos el mvp matrix
 
+	//Guardamos el world matrix en el constant buffer
 	XMStoreFloat4x4(&constantBufferData.worldMat, XMMatrixTranspose(worldMat));
 
-													  // copy our ConstantBuffer instance to the mapped constant buffer resource
+	//copiamos los datos a la GPU
 	memcpy(constBufferGPUAddress, &constantBufferData, sizeof(constantBufferData));
 
-	// now do cube2's world matrix
-	// create rotation matrices for cube2
+	//Mismo proceso para el cubo 2
 	rotXMat = XMMatrixRotationX(0.002f);
 	rotYMat = XMMatrixRotationY(0.003f);
 	rotZMat = XMMatrixRotationZ(0.001f);
 
-	// add rotation to cube2's rotation matrix and store it
+	// rotacion
 	rotMat = (XMLoadFloat4x4(&cube2RotMat) * (rotXMat * rotYMat * rotZMat));
 	XMStoreFloat4x4(&cube2RotMat, rotMat);
 
-	// create translation matrix for cube 2 to offset it from cube 1 (its position relative to cube1
+	// traslacion
 	translationMat = XMMatrixTranslationFromVector(XMLoadFloat4(&cube2Pos));
 
-	// we want cube 2 to be half the size of cube 1, so we scale it by .5 in all dimensions
+	// escala
 	scaleMat = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 
-	// reuse worldMat. 
-	// first we scale cube2. scaling happens relative to point 0,0,0, so you will almost always want to scale first
-	// then we translate it. 
-	// then we rotate it. rotation always rotates around point 0,0,0
-	// finally we move it to cube 1's position, which will cause it to rotate around cube 1
+	//World matrix
 	worldMat = rotMat * scaleMat * translationMat;
 
-	wvpMat = XMLoadFloat4x4(&cube2WorldMat) * viewMat * projMat; // create wvp matrix
-	transposed = XMMatrixTranspose(wvpMat); // must transpose wvp matrix for the gpu
-	XMStoreFloat4x4(&constantBufferData.wvpMat, transposed); // store transposed wvp matrix in constant buffer
-	
+	//WVP matrix
+	wvpMat = XMLoadFloat4x4(&cube2WorldMat) * viewMat * projMat;
+	transposed = XMMatrixTranspose(wvpMat); 
+	XMStoreFloat4x4(&constantBufferData.wvpMat, transposed);
+
 	XMStoreFloat4x4(&constantBufferData.worldMat, XMMatrixTranspose(worldMat));
 
-													  // copy our ConstantBuffer instance to the mapped constant buffer resource
+	//Guardamos en GPU
 	memcpy(constBufferGPUAddress + constBufferAlignedSize, &constantBufferData, sizeof(constantBufferData));
 
-	// store cube2's world matrix
 	XMStoreFloat4x4(&cube2WorldMat, worldMat);
 }
 
-// Render the scene.
 bool DirectRenderer::OnRender()
 {
-	// Record all the commands we need to render the scene into the command list.
+	// Grabamos todos los comandos
 	PopulateCommandList();
 
-	// Execute the command list.
+	// Ejecutamos los comandos
 	ID3D12CommandList* ppCommandLists[] = { commandList.Get() };
 	commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
-	// Present the frame.
+	// Presentamos el frame
 	ThrowIfFailed(swapChain->Present(1, 0));
 
+	//Nos movemos al siguiente frame si ya ha acabado todo
 	MoveToNextFrame();
 
 	return true;
@@ -714,8 +725,6 @@ bool DirectRenderer::OnRender()
 
 void DirectRenderer::Release()
 {
-	// Ensure that the GPU is no longer referencing resources that are about to be
-	// cleaned up by the destructor.
 	MoveToNextFrame();
 
 	CloseHandle(fenceEvent);
@@ -728,66 +737,76 @@ void DirectRenderer::OnResize(UINT width, UINT height)
 
 void DirectRenderer::PopulateCommandList()
 {
-	// Command list allocators can only be reset when the associated 
-	// command lists have finished execution on the GPU; apps should use 
-	// fences to determine GPU execution progress.
+	//Reiniciamos el command allocator
 	ThrowIfFailed(commandAllocators[frameIndex]->Reset());
 
-	// However, when ExecuteCommandList() is called on a particular command 
-	// list, that command list can then be reset at any time and must be before 
-	// re-recording.
+	//Reiniciamos el commandlist
 	ThrowIfFailed(commandList->Reset(commandAllocators[frameIndex].Get(), pipelineState.Get()));
 
-	// Set necessary state.
+	// Asignamos el root signature
 	commandList->SetGraphicsRootSignature(rootSignature.Get());
 
-	// set constant buffer descriptor heap
+	// Asignamos el SRV Heap
 	ID3D12DescriptorHeap* descriptorHeaps[] = { srvHeap.Get() };
 	commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-	// set the descriptor table to the descriptor heap (parameter 1, as constant buffer root descriptor is parameter index 0)
+	// Asignamos el descriptor table
 	commandList->SetGraphicsRootDescriptorTable(1, srvHeap->GetGPUDescriptorHandleForHeapStart());
 
-	// set the root descriptor table 0 to the constant buffer descriptor heap
-	//commandList->SetGraphicsRootDescriptorTable(0, cbvHeap->GetGPUDescriptorHandleForHeapStart());
-
+	//Asignamos el viewport y el scissorRect
 	commandList->RSSetViewports(1, &viewport);
 	commandList->RSSetScissorRects(1, &scissorRect);
 
-	// Indicate that the back buffer will be used as a render target.
+	// Indicamos que el backbuffer se va a usar como render target
 	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTargets[frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
+	//Obtenemos los CPU Descriptor handle
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart(), frameIndex, rtvDescriptorSize);
-	// get a handle to the depth/stencil buffer
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
-	// set the render target for the output merger stage (the output of the pipeline)
+	// Asignamos el render target para el output merger stage (the output of the pipeline)
 	commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
-	// Record commands.
+	// Grabar los comandos
 	const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr); //Limpiamos el canvas
+
+	//Limpiamos el depth stencil
+	commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr); 
+
+	//Definimos la topologia 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	//Asignamos el vertex buffer
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+
+	//Asignamos el index buffer
 	commandList->IASetIndexBuffer(&indexBufferView);
+
+	//Definimos que constant buffer view vamos a usar
 	commandList->SetGraphicsRootConstantBufferView(0, constBufferUploadHeap->GetGPUVirtualAddress());
 
-	commandList->DrawIndexedInstanced(numCubeIndices, 1, 0, 0, 0);
-	commandList->SetGraphicsRootConstantBufferView(0, constBufferUploadHeap->GetGPUVirtualAddress() + constBufferAlignedSize);
+	//Pintamos una instancia
 	commandList->DrawIndexedInstanced(numCubeIndices, 1, 0, 0, 0);
 
-	// Indicate that the back buffer will now be used to present.
+	//Definimos que constant buffer view vamos a usar (segundo cubo)
+	commandList->SetGraphicsRootConstantBufferView(0, constBufferUploadHeap->GetGPUVirtualAddress() + constBufferAlignedSize);
+
+	//Pintamos una instancia
+	commandList->DrawIndexedInstanced(numCubeIndices, 1, 0, 0, 0);
+
+	// Indicamos que el backbuffer va a ser usado para presentar
 	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTargets[frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
+	//Finalmente cerramos el command list para dejar de grabar
 	ThrowIfFailed(commandList->Close());
 }
 
 std::vector<UINT8> DirectRenderer::GenerateTextureData()
 {
 	const UINT rowPitch = 512 * 4;
-	const UINT cellPitch = rowPitch >> 3;		// The width of a cell in the checkboard texture.
-	const UINT cellHeight = 512 >> 3;	// The height of a cell in the checkerboard texture.
+	const UINT cellPitch = rowPitch >> 3;
+	const UINT cellHeight = 512 >> 3;
 	const UINT textureSize = rowPitch * 512;
 
 	std::vector<UINT8> data(textureSize);
@@ -831,13 +850,9 @@ void DirectRenderer::GetHardwareAdapter(IDXGIFactory4 * pFactory, IDXGIAdapter1 
 
 		if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
 		{
-			// Don't select the Basic Render Driver adapter.
-			// If you want a software adapter, pass in "/warp" on the command line.
 			continue;
 		}
 
-		// Check to see if the adapter supports Direct3D 12, but don't create the
-		// actual device yet.
 		if (SUCCEEDED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), nullptr)))
 		{
 			break;
@@ -847,38 +862,39 @@ void DirectRenderer::GetHardwareAdapter(IDXGIFactory4 * pFactory, IDXGIAdapter1 
 	*ppAdapter = adapter.Detach();
 }
 
-// Prepare to render the next frame.
+// Preparar para moverse al siguiente frame
 void DirectRenderer::MoveToNextFrame()
 {
-	// Schedule a Signal command in the queue.
+	// Preparamos una señal al command list.
 	const UINT64 currentFenceValue = fenceValues[frameIndex];
 	ThrowIfFailed(commandQueue->Signal(fence.Get(), currentFenceValue));
 
-	// Update the frame index.
+	// Actualizamos el frame index
 	frameIndex = swapChain->GetCurrentBackBufferIndex();
 
+	//Obtenemos el valor de completado
 	UINT64 compValue = fence->GetCompletedValue();
 
-	// If the next frame is not ready to be rendered yet, wait until it is ready.
+	// Si el frame no está listo todavia, esperamos
 	if (compValue < fenceValues[frameIndex])
 	{
 		ThrowIfFailed(fence->SetEventOnCompletion(fenceValues[frameIndex], fenceEvent));
 		WaitForSingleObjectEx(fenceEvent, INFINITE, FALSE);
 	}
 
-	// Set the fence value for the next frame.
+	// Asignamos el fence value para el siguiente frame.
 	fenceValues[frameIndex] = currentFenceValue + 1;
 }
 
 void DirectRenderer::WaitForGpu()
 {
-	// Schedule a Signal command in the queue.
+	// Preparamos una señal al command list.
 	ThrowIfFailed(commandQueue->Signal(fence.Get(), fenceValues[frameIndex]));
 
-	// Wait until the fence has been processed.
+	// Esperamos hasta que todo se haya procesado
 	ThrowIfFailed(fence->SetEventOnCompletion(fenceValues[frameIndex], fenceEvent));
 	WaitForSingleObjectEx(fenceEvent, INFINITE, FALSE);
 
-	// Increment the fence value for the current frame.
+	// Asignamos el fence value para el frame actual.
 	fenceValues[frameIndex]++;
 }
