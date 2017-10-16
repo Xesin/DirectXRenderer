@@ -50,6 +50,7 @@ private:
 	ComPtr<ID3D12RootSignature> rootSignature;
 	ComPtr<ID3D12DescriptorHeap> rtvHeap;
 	ComPtr<ID3D12DescriptorHeap> cbvHeap;
+	ComPtr<ID3D12DescriptorHeap> srvHeap;
 	ComPtr<ID3D12PipelineState> pipelineState;
 	ComPtr<ID3D12GraphicsCommandList> commandList;
 	UINT rtvDescriptorSize;
@@ -78,6 +79,8 @@ private:
 	int constBufferAlignedSize = (sizeof(constBuffer) + 255) & ~255;
 	ComPtr<ID3D12Resource> constBufferUploadHeap;
 	UINT8* constBufferGPUAddress;
+	ComPtr<ID3D12Resource> textureBuffer;
+	UINT8* textureBufferGPUAddress;
 
 	//Objetos de sincronización
 	UINT frameIndex;
