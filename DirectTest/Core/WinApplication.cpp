@@ -54,7 +54,6 @@ int WinApplication::InitInstance(HINSTANCE hInstance, int nCmdShow, EngineState*
 	RECT windowRect = { 0, 0, static_cast<LONG>(engineApp->GetWidth()), static_cast<LONG>(engineApp->GetHeight()) };
 	AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
 	
-
 	m_hwnd = CreateWindow(
 		szWindowClass, 
 		engineApp->GetTitle(),
@@ -116,10 +115,6 @@ ATOM WinApplication::MyRegisterClass(HINSTANCE hInstance)
 //
 //  PURPOSE:  Processes messages for the main window.
 //
-//  WM_COMMAND  - process the application menu
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-//
 //
 LRESULT CALLBACK WinApplication::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -134,7 +129,7 @@ LRESULT CALLBACK WinApplication::WindowProc(HWND hWnd, UINT message, WPARAM wPar
 		{
 		case WM_CREATE:
 		{
-			// Save the DXSample* passed in to CreateWindow.
+			// Save the EngineState* pointer
 			LPCREATESTRUCT pCreateStruct = reinterpret_cast<LPCREATESTRUCT>(lParam);
 			SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pCreateStruct->lpCreateParams));
 			result = 0;
@@ -158,13 +153,6 @@ LRESULT CALLBACK WinApplication::WindowProc(HWND hWnd, UINT message, WPARAM wPar
 				result = 0;
 				wasHandled = true;
 			}
-			break;
-
-		case WM_PAINT:
-		{
-			result = 0;
-			wasHandled = false;
-		}
 			break;
 		case WM_SIZE:
 		{

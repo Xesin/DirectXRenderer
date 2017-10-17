@@ -188,6 +188,7 @@
     <ClInclude Include="Core\EngineState.h" />
     <ClInclude Include="Core\WinApplication.h" />
     <ClInclude Include="Game1\TriangleGame.h" />
+    <ClInclude Include="Objects\Mesh.h" />
     <ClInclude Include="Renderer\d3dx12.h" />
     <ClInclude Include="Renderer\DirectRenderer.h" />
     <ClInclude Include="Renderer\Texture2D.h" />
@@ -199,6 +200,7 @@
     <ClCompile Include="Core\WinApplication.cpp" />
     <ClCompile Include="Game1\TriangleGame.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Objects\Mesh.cpp" />
     <ClCompile Include="Renderer\DirectRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>

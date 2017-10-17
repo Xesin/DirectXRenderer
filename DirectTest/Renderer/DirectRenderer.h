@@ -14,6 +14,20 @@ const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.1f;
 
+struct Vertex
+{
+	XMFLOAT3 position;
+	XMFLOAT2 uv;
+	XMFLOAT4 color;
+	XMFLOAT3 normal;
+};
+
+struct AppBuffer
+{
+	XMFLOAT4X4 wvpMat;
+	XMFLOAT4X4 worldMat;
+};
+
 class DirectRenderer {
 public:
 	DirectRenderer(UINT width, UINT height);
@@ -54,20 +68,6 @@ private:
 	ComPtr<ID3D12DescriptorHeap> cbvHeap; //almacena la posición de nuestro constant buffer view
 	ComPtr<ID3D12DescriptorHeap> srvHeap; //almacena la posición de nuestro Shader Resource view
 	ComPtr<ID3D12PipelineState> pipelineState; //Representa el estado de todos los shaders que se han asignado
-
-	struct Vertex
-	{
-		XMFLOAT3 position;
-		XMFLOAT2 uv;
-		XMFLOAT4 color;
-		XMFLOAT3 normal;
-	};
-
-	struct AppBuffer
-	{
-		XMFLOAT4X4 wvpMat;
-		XMFLOAT4X4 worldMat;
-	};
 
 	ComPtr<ID3D12Resource> vertexBuffer; //El buffer encargado de cargar los vertices en la GPU
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView; //Una estructura que almacena la información de los vertices
