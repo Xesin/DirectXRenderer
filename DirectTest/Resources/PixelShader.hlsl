@@ -22,7 +22,7 @@ SamplerState g_sampler : register(s0);
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
-    float light = dot(float3(0.75, 1.0, -0.0), input.normal.xyz);
+    float light = dot(float3(0.5, 0.0, -1.0), input.normal.xyz);
 
     float4 texColor = g_texture.Sample(g_sampler, input.uv);
 
@@ -31,5 +31,5 @@ float4 PSMain(PSInput input) : SV_TARGET
         discard;
     }
 
-    return texColor;
+    return texColor * light;
 }
