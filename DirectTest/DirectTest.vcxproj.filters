@@ -72,6 +72,9 @@
     <ClInclude Include="Objects\Mesh.h">
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Core\ImageLoader.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer\DirectRenderer.cpp">
@@ -91,6 +94,9 @@
     </ClCompile>
     <ClCompile Include="Objects\Mesh.cpp">
       <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ImageLoader.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

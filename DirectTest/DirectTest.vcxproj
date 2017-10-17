@@ -186,6 +186,7 @@
   <ItemGroup>
     <ClInclude Include="Core\DirectXHelper.h" />
     <ClInclude Include="Core\EngineState.h" />
+    <ClInclude Include="Core\ImageLoader.h" />
     <ClInclude Include="Core\WinApplication.h" />
     <ClInclude Include="Game1\TriangleGame.h" />
     <ClInclude Include="Objects\Mesh.h" />
@@ -197,6 +198,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\EngineState.cpp" />
+    <ClCompile Include="Core\ImageLoader.cpp" />
     <ClCompile Include="Core\WinApplication.cpp" />
     <ClCompile Include="Game1\TriangleGame.cpp" />
     <ClCompile Include="Main.cpp" />

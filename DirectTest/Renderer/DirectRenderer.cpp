@@ -1,6 +1,7 @@
 #include "DirectRenderer.h"
 #include "../Core/DirectXHelper.h"
 #include "../Objects/Mesh.h"
+#include "../Core/ImageLoader.h"
 #include <d3dcompiler.h>
 #include "d3dx12.h"
 
@@ -257,6 +258,10 @@ void DirectRenderer::LoadAssets()
 	//Tenemos un sampler
 	DXGI_SAMPLE_DESC sampleDesc = {};
 	sampleDesc.Count = 1;
+	CD3DX12_RASTERIZER_DESC rasterDesc(D3D12_DEFAULT);
+	CD3DX12_DEPTH_STENCIL_DESC depthStencilDesc(D3D12_DEFAULT);
+	CD3DX12_BLEND_DESC blendDesc(D3D12_DEFAULT);
+	blendDesc.AlphaToCoverageEnable = FALSE;
 
 	//Creamos y rellenamos la descripción del PSO
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {}; 
@@ -268,10 +273,10 @@ void DirectRenderer::LoadAssets()
 	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // formato del render target
 	psoDesc.SampleDesc = sampleDesc;
 	psoDesc.SampleMask = 0xffffffff; // sample mask has to do with multi-sampling. 0xffffffff means point sampling is done
-	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	psoDesc.RasterizerState = rasterDesc;
+	psoDesc.BlendState = blendDesc;
 	psoDesc.NumRenderTargets = 1; // solo vinculamos un render target
-	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	psoDesc.DepthStencilState = depthStencilDesc;
 	psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 
 	//Crear el PSO
@@ -300,44 +305,44 @@ void DirectRenderer::LoadAssets()
 		Vertex vList[] = {
 			// Cara delantera (cerca de la camara)
 			//{posX, posY, poxZ}, {u,v}, {r, g, b, a}, {x, y, z} (posicion, UVs, color, normales (Smooth))
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { -1.0f, 1.0f, -1.0f} }, 
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, -1.0f, -1.0f } },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f } },
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, -1.0f } },
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f },	{ 0.0f,  0.0f, -1.0f} }, 
+			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f },	{  0.0f, 0.0f, -1.0f } },
+			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, -1.0f } },
+			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  0.0f,  0.0f, -1.0f } },
 
 			// Cara derecha
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, -1.0f, -1.0f} },
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } , { 1.0f, 1.0f, 1.0f}},
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, -1.0f, 1.0f} },
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, -1.0f} },
+			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },	{  1.0f, 0.0f, 0.0f} },
+			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } ,		{  1.0f,  0.0f,  0.0f}},
+			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  1.0f, 0.0f,  0.0f} },
+			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  1.0f,  0.0f, 0.0f} },
 
 
 			// cara izquierda
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f }, { -1.0f, 1.0f, 1.0f } },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f }, { -1.0f, -1.0f, -1.0f} },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, -1.0f, 1.0f}},
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, 1.0f, -1.0f}},
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },		{ -1.0f,  0.0f,  0.0f } },
+			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },	{ -1.0f, 0.0f, 0.0f} },
+			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ -1.0f, 0.0f,  0.0f}},
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ -1.0f,  0.0f, 0.0f}},
 
 
 			// Cara trasera
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f } ,{ 1.0f, 1.0f, 1.0f } },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f }, { -1.0f, -1.0f, 1.0f} },
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { 1.0f, -1.0f, 1.0f }},
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, 1.0f, 1.0f }},
+			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f } ,		{  0.0f,  0.0f,  1.0f } },
+			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },	{ 0.0f, 0.0f,  1.0f} },
+			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{  0.0f, 0.0f,  1.0f }},
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ 0.0f,  0.0f,  1.0f }},
 
 
 			// Cara de arriba
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f }, { -1.0f, 1.0f, -1.0f} },
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } , { 1.0f, 1.0f, 1.0f}},
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, -1.0f} },
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f }, { -1.0f, 1.0f, 1.0f} },
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },	{ 0.0f,  1.0f, 0.0f} },
+			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } ,		{  0.0f,  1.0f,  0.0f}},
+			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  0.0f,  1.0f, 0.0f} },
+			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{ 0.0f,  1.0f,  0.0f} },
 
 
 			// Cara de abajo
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },{ 1.0f, -1.0f, 1.0f } },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f }, { -1.0f, -1.0f, -1.0f} },
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { 1.0f, -1.0f, -1.0f}},
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } , { -1.0f, -1.0f, 1.0f}},
+			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },		{  0.0f, -1.0f,  0.0f } },
+			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },	{ 0.0f, -1.0f, 0.0f} },
+			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{  0.0f, -1.0f, 0.0f}},
+			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ 0.0f, -1.0f,  0.0f}},
 
 		};
 
@@ -418,12 +423,18 @@ void DirectRenderer::LoadAssets()
 	ComPtr<ID3D12Resource> textureUploadHeap;
 	//Creamos la textura
 	{
+		int imageBytesPerRow;
+		Image imageData;
+		ZeroMemory(&imageData, sizeof(Image));
+		ImageLoader::LoadImageFromFile(L"Resources/woodTexture.jpg", imageBytesPerRow, &imageData);
+
+
 		// Creamos la descripcion
 		D3D12_RESOURCE_DESC textureDesc = {};
 		textureDesc.MipLevels = 1;
-		textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		textureDesc.Width = 512;
-		textureDesc.Height = 512;
+		textureDesc.Format = imageData.dxgiFormat;
+		textureDesc.Width = imageData.textureWidth;
+		textureDesc.Height = imageData.textureHeight;
 		textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 		textureDesc.DepthOrArraySize = 1;
 		textureDesc.SampleDesc.Count = 1;
@@ -455,13 +466,10 @@ void DirectRenderer::LoadAssets()
 			IID_PPV_ARGS(&textureUploadHeap)));
 		textureUploadHeap->SetName(L"Texture Buffer Upload Resource Heap");
 
-		//Generamos los datos de la textura
-		std::vector<UINT8> texture = GenerateTextureData();
-
 		D3D12_SUBRESOURCE_DATA textureData = {};
-		textureData.pData = &texture[0];
-		textureData.RowPitch = 512 * 4;
-		textureData.SlicePitch = textureData.RowPitch * 512;
+		textureData.pData = &imageData.imageData[0];
+		textureData.RowPitch = imageBytesPerRow;
+		textureData.SlicePitch = textureData.RowPitch * imageData.textureHeight;
 
 		//Copiamos la textura al default heap
 		UpdateSubresources(commandList.Get(), textureBuffer.Get(), textureUploadHeap.Get(), 0, 0, 1, &textureData);
@@ -534,7 +542,7 @@ void DirectRenderer::LoadAssets()
 		XMStoreFloat4x4(&cameraViewMat, tmpMat);
 
 
-		cubePosition = XMFLOAT4(0.0f, -1.f, 0.0f, 0.0f); // asignamos la posición del cubo 1
+		cubePosition = XMFLOAT4(0.0f, -0.f, 0.0f, 0.0f); // asignamos la posición del cubo 1
 		XMVECTOR posVec = XMLoadFloat4(&cubePosition); // Creamos un XM Vector
 
 		tmpMat = XMMatrixTranslationFromVector(posVec); // crear el matrix de translacion
@@ -575,7 +583,7 @@ void DirectRenderer::OnUpdate()
 
 	//Crear un matrix de escala para el cubo 1
 
-	XMMATRIX scaleMat = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	XMMATRIX scaleMat = XMMatrixScaling(2.0f, 2.0f, 2.0f);
 
 	// Creamos el world matrix para el cubo 1, primero realizamos la rotación para que sea en base al centro del objeto
 	XMMATRIX worldMat = rotMat * translationMat * scaleMat;
