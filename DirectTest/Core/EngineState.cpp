@@ -1,6 +1,5 @@
 #include "EngineState.h"
 #include "DirectXHelper.h"
-#include "../Renderer/DirectRenderer.h"
 #include "WinApplication.h"
 #include <wrl\client.h>
 

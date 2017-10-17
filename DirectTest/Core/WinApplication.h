@@ -1,10 +1,11 @@
 #pragma once
 #include "../resource.h"
 #include <Windows.h>
+
 class EngineState;
+class DirectRenderer;
 
 class WinApplication {
-
 public:
 	static int Run(EngineState* engineApp, HINSTANCE hInstance, int nCmdShow);
 	static HWND GetHwnd() { return m_hwnd; }
@@ -15,7 +16,6 @@ protected:
 private:
 	static int InitInstance(HINSTANCE hInstance, int nCmdShow, EngineState* engineApp);
 	static ATOM MyRegisterClass(HINSTANCE hInstance);
-
-private:
 	static HWND m_hwnd;
+	static DirectRenderer* renderer;
 };

@@ -8,8 +8,6 @@ TriangleGame::TriangleGame(unsigned int width, unsigned int height, std::wstring
 
 void TriangleGame::OnInit()
 {
-	renderer = new DirectRenderer(GetWidth(), GetHeight());
-	renderer->Initialize();
 }
 
 void TriangleGame::OnUpdate()
@@ -18,7 +16,6 @@ void TriangleGame::OnUpdate()
 
 void TriangleGame::OnRender()
 {
-	renderer->OnRender();
 }
 
 void TriangleGame::OnDestroy()
