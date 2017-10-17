@@ -161,33 +161,24 @@ void DirectRenderer::LoadPipeline()
 // Cargar los assets para el ejemplo.
 void DirectRenderer::LoadAssets()
 {
-	// Crear un root descriptor, indica donde encontrar los datos para este parametro
-	D3D12_ROOT_DESCRIPTOR rootCBVDescriptor;
-	rootCBVDescriptor.RegisterSpace = 0;
-	rootCBVDescriptor.ShaderRegister = 0;
+	D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+
+	// This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
+	featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+
+	if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
+	{
+		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+	}
 
 	// Crear el descriptor range y rellenarlo
-	D3D12_DESCRIPTOR_RANGE  descriptorTableRanges[1]; // Por ahora solo un range
-	descriptorTableRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // Es del tipo shader resource views (descriptors)
-	descriptorTableRanges[0].NumDescriptors = 1; // Por ahora solo tenemos una textura
-	descriptorTableRanges[0].BaseShaderRegister = 0; // Indice de inicio del shader
-	descriptorTableRanges[0].RegisterSpace = 0; // normalmente puede ser 0
-	descriptorTableRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Esto añade el range al final del root signature descriptor tables
-
-	// Crear un descriptor table
-	D3D12_ROOT_DESCRIPTOR_TABLE descriptorTable;
-	descriptorTable.NumDescriptorRanges = _countof(descriptorTableRanges);
-	descriptorTable.pDescriptorRanges = &descriptorTableRanges[0]; // puntero al principio de nuestros ranges
+	CD3DX12_DESCRIPTOR_RANGE1  descriptorTableRanges[1]; // Por ahora solo un range
+	descriptorTableRanges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_NONE, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND);
 
 	// crear un root parameter para el root descriptor y rellenarlo
-	D3D12_ROOT_PARAMETER  rootParameters[2]; // dos root parameters
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // Es primero es de tipo constant buffer
-	rootParameters[0].Descriptor = rootCBVDescriptor; // este es el root descriptor para este parametro
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // la visibilidad de este parametro es por vertice
-
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // El segundo parametro es de tipo descriptor table
-	rootParameters[1].DescriptorTable = descriptorTable; // Este es nuestro descriptor table
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // la visibilidad de este parametro es por pixel
+	CD3DX12_ROOT_PARAMETER1  rootParameters[2]; // dos root parameters
+	rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX);
+	rootParameters[1].InitAsDescriptorTable(_countof(descriptorTableRanges), &descriptorTableRanges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	//Creamos un sampler desc para nuestro sampler estatico
 	D3D12_STATIC_SAMPLER_DESC sampler = {};
@@ -205,21 +196,21 @@ void DirectRenderer::LoadAssets()
 	sampler.RegisterSpace = 0;
 	sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	//Creamos el root signature description y el root signature
-	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init(_countof(rootParameters),
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+	rootSignatureDesc.Init_1_1(_countof(rootParameters),
 		rootParameters,
-		1, //Tenemos un sampler estatico
-		&sampler, //puntero a nuestro sampler description
+		1,
+		&sampler,
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | //Podemos denegar el acceso a ciertas etapas para mejor rendimiento
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS);
-
+	
 	ID3DBlob* signature;
 
 	//Comprobamos que se puede deserializar (para saber si es correcta)
-	ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, nullptr));
+	
+	ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, featureData.HighestVersion, &signature, nullptr));
 
 	//Creamos el root signature
 	ThrowIfFailed(device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
