@@ -293,49 +293,50 @@ void DirectRenderer::LoadAssets()
 	// Crear el vertex buffer y el index buffer
 	{
 		// Creamos la lista de vertices que necesita el cubo
-		Vertex vList[] = {
-			// Cara delantera (cerca de la camara)
-			//{posX, posY, poxZ}, {u,v}, {r, g, b, a}, {x, y, z} (posicion, UVs, color, normales (Smooth))
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f },	{ 0.0f,  0.0f, -1.0f} }, 
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f },	{  0.0f, 0.0f, -1.0f } },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, -1.0f } },
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  0.0f,  0.0f, -1.0f } },
+		std::vector<Vertex> vecVList;
+		Vertex* vList;
+		// Cara delantera (cerca de la camara)
+		//{posX, posY, poxZ}, {u,v}, {r, g, b, a}, {x, y, z} (posicion, UVs, color, normales (Smooth))
+		vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f },	{ 0.0f,  0.0f, -1.0f} });
+		vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f },	{  0.0f, 0.0f, -1.0f } });
+		vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, -1.0f } });
+		vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  0.0f,  0.0f, -1.0f } });
 
-			// Cara derecha
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },	{  1.0f, 0.0f, 0.0f} },
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } ,		{  1.0f,  0.0f,  0.0f}},
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  1.0f, 0.0f,  0.0f} },
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  1.0f,  0.0f, 0.0f} },
-
-
-			// cara izquierda
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },		{ -1.0f,  0.0f,  0.0f } },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },	{ -1.0f, 0.0f, 0.0f} },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ -1.0f, 0.0f,  0.0f}},
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ -1.0f,  0.0f, 0.0f}},
+		// Cara derecha
+		vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },	{  1.0f, 0.0f, 0.0f} } );
+		vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } ,		{  1.0f,  0.0f,  0.0f}});
+		vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  1.0f, 0.0f,  0.0f} });
+		vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  1.0f,  0.0f, 0.0f} });
 
 
-			// Cara trasera
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f } ,		{  0.0f,  0.0f,  1.0f } },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },	{ 0.0f, 0.0f,  1.0f} },
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{  0.0f, 0.0f,  1.0f }},
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ 0.0f,  0.0f,  1.0f }},
+		// cara izquierda
+		vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },		{ -1.0f,  0.0f,  0.0f } });
+		vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },	{ -1.0f, 0.0f, 0.0f} });
+		vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ -1.0f, 0.0f,  0.0f}});
+		vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ -1.0f,  0.0f, 0.0f}});
 
 
-			// Cara de arriba
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },	{ 0.0f,  1.0f, 0.0f} },
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } ,		{  0.0f,  1.0f,  0.0f}},
-			{ { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  0.0f,  1.0f, 0.0f} },
-			{ { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{ 0.0f,  1.0f,  0.0f} },
+		// Cara trasera
+		vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f } ,		{  0.0f,  0.0f,  1.0f } });
+		vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },	{ 0.0f, 0.0f,  1.0f} });
+		vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{  0.0f, 0.0f,  1.0f }});
+		vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ 0.0f,  0.0f,  1.0f }});
 
 
-			// Cara de abajo
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },		{  0.0f, -1.0f,  0.0f } },
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },	{ 0.0f, -1.0f, 0.0f} },
-			{ { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{  0.0f, -1.0f, 0.0f}},
-			{ { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ 0.0f, -1.0f,  0.0f}},
+		// Cara de arriba
+		vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },	{ 0.0f,  1.0f, 0.0f} });
+		vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } ,		{  0.0f,  1.0f,  0.0f}});
+		vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  0.0f,  1.0f, 0.0f} });
+		vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{ 0.0f,  1.0f,  0.0f} });
 
-		};
+
+		// Cara de abajo
+		vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },		{  0.0f, -1.0f,  0.0f } });
+		vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },	{ 0.0f, -1.0f, 0.0f} });
+		vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{  0.0f, -1.0f, 0.0f}});
+		vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ 0.0f, -1.0f,  0.0f}});
+
+		vList = vecVList.data();
 
 		// Lista de indices, indica que vertices van unidos
 		DWORD iList[] = {
@@ -365,14 +366,14 @@ void DirectRenderer::LoadAssets()
 		};
 
 		//Tamaño de los buffers
-		int vBufferSize = sizeof(vList);
+		int vBufferSize = sizeof(vecVList);
 		int iBufferSize = sizeof(iList);
 
 		//Cantidad de indices de cada cubo
 		numCubeIndices = sizeof(iList) / sizeof(DWORD);
 
 		newMesh = new Mesh();
-		newMesh->SetVertices(vList, sizeof(vList) / sizeof(Vertex));
+		newMesh->SetVertices(vList, vecVList.size());
 		newMesh->SetIndices(iList, sizeof(iList) / sizeof(DWORD));
 
 		newMesh->Instanciate(device.Get(), commandList.Get());
