@@ -6,6 +6,7 @@
 #include "d3dx12.h"
 
 Mesh* newMesh;
+using namespace DirectX;
 
 DirectRenderer::DirectRenderer(UINT width, UINT height) :
 	frameIndex(0),
