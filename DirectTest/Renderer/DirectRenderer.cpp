@@ -322,7 +322,7 @@ namespace Renderer {
 			//Cantidad de indices de cada cubo
 			numCubeIndices = sizeof(iList) / sizeof(DWORD);
 
-			newMesh = new Mesh();
+			newMesh = new Mesh(this);
 			newMesh->SetVertices(vList, vecVList.size());
 			newMesh->SetIndices(iList, sizeof(iList) / sizeof(DWORD));
 
@@ -789,25 +789,16 @@ namespace Renderer {
 
 		//Limpiamos el depth stencil
 		commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
-		SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 		
-		//Asignamos el vertex buffer
-		SetVertexBuffer(0, newMesh->vertexBufferView);
-
-		//Asignamos el index buffer
-		SetIndexBuffer(newMesh->indexBufferView);
+		newMesh->Begin();
 
 		SetConstantBuffer(0, constBufferUploadHeap->GetGPUVirtualAddress());
 
-		//Pintamos una instancia
-		DrawIndexedInstanced(numCubeIndices, 1, 0, 0, 0);
+		newMesh->Draw();
 
 		SetConstantBuffer(0, constBufferUploadHeap->GetGPUVirtualAddress() + constBufferAlignedSize);
 
-		//Pintamos una instancia
-		DrawIndexedInstanced(numCubeIndices, 1, 0, 0, 0);
+		newMesh->Draw();
 
 		// Indicamos que el backbuffer va a ser usado para presentar
 		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTargets[frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));

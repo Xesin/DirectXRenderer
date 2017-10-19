@@ -2,12 +2,15 @@
 #include "../Core/DirectX/DirectXHelper.h"
 #include "../Renderer/DirectRenderer.h"
 
-Mesh::Mesh() :
+using namespace Renderer;
+
+Mesh::Mesh(DirectRenderer* context) :
 	vertexBuffer(nullptr),
 	indexBuffer(nullptr),
 	numVertices(0),
 	numIndices(0),
-	instanciated(false)
+	instanciated(false),
+	context(context)
 {
 
 }
@@ -111,4 +114,21 @@ void Mesh::Instanciate(ID3D12Device* device, ID3D12GraphicsCommandList* commandL
 	vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
 	vertexBufferView.StrideInBytes = sizeof(Vertex);
 	vertexBufferView.SizeInBytes = vBufferSize;
+}
+
+void Mesh::Begin()
+{
+	context->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	context->SetVertexBuffer(0, vertexBufferView);
+	context->SetIndexBuffer(indexBufferView);
+}
+
+void Mesh::Draw()
+{
+	context->DrawIndexedInstanced(numIndices, 1, 0, 0, 0);
+}
+
+void Mesh::End()
+{
+
 }

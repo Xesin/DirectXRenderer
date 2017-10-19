@@ -25,6 +25,7 @@ float4 PSMain(PSInput input) : SV_TARGET
     float light = dot(float3(0.5, 0.0, -1.0), input.normal.xyz);
 
     float4 texColor = g_texture.Sample(g_sampler, input.uv);
+    //float4 texColor = input.color;
 
     if (texColor.a == 0)
     {
