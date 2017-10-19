@@ -4,6 +4,7 @@
 #include <d3dcompiler.h>
 
 Mesh* newMesh;
+Mesh* newMesh2;
 using namespace DirectX;
 
 namespace Renderer {
@@ -322,6 +323,15 @@ namespace Renderer {
 			newMesh->Initialize(device.Get(), commandList.Get());
 
 			newMesh->pos = XMFLOAT3(0.0f, 0.0f, -2.f);
+
+			newMesh2 = new Mesh(this);
+			newMesh2->SetVertices(vList, vecVList.size());
+			newMesh2->SetIndices(iList, sizeof(iList) / sizeof(DWORD));
+
+			newMesh2->Initialize(device.Get(), commandList.Get());
+
+			newMesh2->pos = XMFLOAT3(2.0f, 0.0f, -2.f);
+			newMesh2->scale = XMFLOAT3(.5f, 0.5f, 0.5f);
 		}
 
 		//Crear el depth/stencil
@@ -444,21 +454,6 @@ namespace Renderer {
 
 			//Asignamos el view matrix
 			XMStoreFloat4x4(&cameraViewMat, tmpMat);
-
-
-			cubePosition = XMFLOAT4(0.0f, -0.f, 0.0f, 0.0f); // asignamos la posición del cubo 1
-			XMVECTOR posVec = XMLoadFloat4(&cubePosition); // Creamos un XM Vector
-
-			tmpMat = XMMatrixTranslationFromVector(posVec); // crear el matrix de translacion
-			XMStoreFloat4x4(&cubeRotMat, XMMatrixIdentity()); // inicializar el matrix de rotación
-			XMStoreFloat4x4(&cubeWorldMat, tmpMat); // guardar el world matrix del cubo 1
-
-			cube2Pos = XMFLOAT4(1.5f, -1.f, 0.0f, 0.0f); // asignamos la posición del cubo 2
-			XMVECTOR pos2Vec = XMLoadFloat4(&cube2Pos); // Creamos un XM Vector
-
-			tmpMat = XMMatrixTranslationFromVector(pos2Vec);  // crear el matrix de translacion
-			XMStoreFloat4x4(&cube2RotMat, XMMatrixIdentity()); // inicializar el matrix de rotación
-			XMStoreFloat4x4(&cube2WorldMat, tmpMat); // guardar el world matrix del cubo 1
 		}
 
 		// Ahora ejecutamos el command list para cargar los assets
@@ -476,11 +471,15 @@ namespace Renderer {
 		XMMATRIX viewMat = XMLoadFloat4x4(&cameraViewMat); // load view matrix
 		XMMATRIX projMat = XMLoadFloat4x4(&cameraProjMat); // load projection matrix
 		
-		newMesh->Update(viewMat, projMat);
 
 		newMesh->rotation.x += 0.001f;
 		newMesh->rotation.y += 0.002f;
 		newMesh->rotation.z += 0.003f;
+
+		newMesh->Update(viewMat, projMat);
+
+		newMesh2->rotation = newMesh->rotation;
+		newMesh2->Update(viewMat, projMat);
 	}
 
 	bool DirectRenderer::OnRender()
@@ -697,6 +696,9 @@ namespace Renderer {
 		newMesh->Begin();
 
 		newMesh->Draw();
+
+		newMesh2->Begin();
+		newMesh2->Draw();
 
 		// Indicamos que el backbuffer va a ser usado para presentar
 		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTargets[frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
