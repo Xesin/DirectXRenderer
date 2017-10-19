@@ -24,6 +24,7 @@ struct AppBuffer
 	XMFLOAT4X4 wvpMat;
 	XMFLOAT4X4 worldMat;
 };
+
 namespace Renderer {
 
 	extern ComPtr<ID3D12Device> device; //Representa un adaptador virtual. Sirve para crear command lists, queues, fences...
@@ -88,7 +89,7 @@ namespace Renderer {
 		float aspectRatio;
 	public:
 		bool useWarpDevice;
-
+		ComPtr<ID3D12GraphicsCommandList> commandList; //Encapsula una lista de comandos que tiene que ejecutar la GPU
 	private:
 		static const UINT FRAME_COUNT = 2; //Numero de frames que usamos para renderizar (2 = doble buffer)
 
@@ -98,13 +99,11 @@ namespace Renderer {
 		ComPtr<ID3D12Resource> renderTargets[FRAME_COUNT]; //Tenemos un render target por cada frame (Double buffer)
 		ComPtr<ID3D12CommandAllocator> commandAllocators[FRAME_COUNT]; //el command allocator representa el almacenamiento de los GPU commands
 		ComPtr<ID3D12CommandQueue> commandQueue; //Provee metodos para enviar command lists, sincronizar la ejecución de command lists...
-		ComPtr<ID3D12GraphicsCommandList> commandList; //Encapsula una lista de comandos que tiene que ejecutar la GPU
 		RootSignature rootSignature; //Define que recursos están vinculados a la graphic pipeline.
 		ID3D12RootSignature* currRootSignature; //Define que recursos están vinculados a la graphic pipeline.
 		ID3D12PipelineState* m_CurGraphicsPipelineState;
 		ComPtr<ID3D12DescriptorHeap> rtvHeap; //almacena la posición de nuestro render target view
 		UINT rtvDescriptorSize; //Tamaño de nuestro rtv Descriptor
-		ComPtr<ID3D12DescriptorHeap> cbvHeap; //almacena la posición de nuestro constant buffer view
 		ComPtr<ID3D12DescriptorHeap> srvHeap; //almacena la posición de nuestro Shader Resource view
 		GraphicsPSO pipelineState; //Representa el estado de todos los shaders que se han asignado
 
@@ -115,9 +114,6 @@ namespace Renderer {
 		ComPtr<ID3D12Resource> depthStencilBuffer; // Es la memoria de nuestro depth stencil.
 		ID3D12DescriptorHeap* dsDescriptorHeap; // es nuestro heap para el depth/stencil buffer descriptor
 		AppBuffer constantBufferData; //Objeto que usamos para asignar los datos de nuestro constant buffer
-		int constBufferAlignedSize = (sizeof(constantBufferData) + 255) & ~255; // Necesitamos que el buffer sea de bloques alineados de 256 bytes
-		ComPtr<ID3D12Resource> constBufferUploadHeap;  //El buffer encargado de cargar el constant buffer a la GPU
-		UINT8* constBufferGPUAddress; //Posición de memoria de nuestro Constant Buffer
 		ComPtr<ID3D12Resource> textureBuffer; //El buffer encargado de cargar la textura a la GPU
 		UINT8* textureBufferGPUAddress; //Posición de memoria de nuestro texture buffer
 

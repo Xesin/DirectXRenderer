@@ -29,11 +29,12 @@
 #include <memory>
 #include <string>
 #include <exception>
-
+#include <DirectXMath.h>
 #include <wrl.h>
 #include <ppltasks.h>
 
 #include "DirectX/DirectXHelper.h"
+
 #include "Math\Common.h"
 #include "WinApplication.h"
 #include "EngineState.h"

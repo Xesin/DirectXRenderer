@@ -1,6 +1,4 @@
 #include "Mesh.h"
-#include "../Core/DirectX/DirectXHelper.h"
-#include "../Renderer/DirectRenderer.h"
 
 using namespace Renderer;
 
@@ -12,7 +10,8 @@ Mesh::Mesh(DirectRenderer* context) :
 	instanciated(false),
 	context(context)
 {
-
+	ZeroMemory(&constBuffer, sizeof(AppBuffer));
+	scale = XMFLOAT3(1.f, 1.f, 1.f);
 }
 
 void Mesh::SetVertices(Vertex* vertList, UINT numVertices) {
@@ -25,7 +24,7 @@ void Mesh::SetIndices(DWORD* indicesList, UINT numIndices) {
 	this->numIndices = numIndices;
 }
 
-void Mesh::Instanciate(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+void Mesh::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 	instanciated = true;
 
@@ -114,6 +113,70 @@ void Mesh::Instanciate(ID3D12Device* device, ID3D12GraphicsCommandList* commandL
 	vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
 	vertexBufferView.StrideInBytes = sizeof(Vertex);
 	vertexBufferView.SizeInBytes = vBufferSize;
+
+	// Describir y crear el constant buffer view (CBV) descriptor heap.
+	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc = {};
+	cbvHeapDesc.NumDescriptors = 1;
+	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	ThrowIfFailed(device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&cbvHeap)));
+
+	//Creamos el constant buffer
+	{
+
+		//Como es un dato que se actualiza constantemente, solo creamos un upload heap
+		device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(1024 * 64), // Tamaño del buffer.Tiene que ser un multiplo de 64KB para una textura o constant buffer
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(&constBufferUploadHeap));
+
+		constBufferUploadHeap->SetName(L"Constant Buffer Upload Resource Heap");
+
+		ZeroMemory(&constBuffer, sizeof(AppBuffer));
+
+		//Asignamos los datos
+		XMStoreFloat4x4(&constBuffer.wvpMat, XMMatrixTranspose(XMMatrixIdentity()));
+		XMStoreFloat4x4(&constBuffer.worldMat, XMMatrixTranspose(XMMatrixIdentity()));
+
+		CD3DX12_RANGE readRange(0, 0);    // No tenemos intencion de leer estos datos desde la CPU.
+
+										  //Mapeamos para obtener la dirección de memoria del buffer en la GPU
+		ThrowIfFailed(constBufferUploadHeap->Map(0, &readRange, reinterpret_cast<void**>(&constBufferGPUAddress)));
+
+		//Copiamos los datos a esa dirección de memoria
+		memcpy(constBufferGPUAddress, &constBuffer, sizeof(constBuffer));
+		constBufferUploadHeap->Unmap(0, nullptr);
+	}
+}
+
+void Mesh::Update(XMMATRIX viewMat, XMMATRIX projectionMat)
+{
+	XMMATRIX tmp = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&rotation));
+	// Añadimos la rotacion a la que ya tenia el cubo 1
+	XMMATRIX rotMat = tmp;
+
+	//Crear el matrix de traslacion a partir de la posicion del cubo 1
+	XMMATRIX translationMat = XMMatrixTranslationFromVector(XMLoadFloat3(&pos));
+
+	//Crear un matrix de escala para el cubo 1
+
+	XMMATRIX scaleMat = XMMatrixScalingFromVector(XMLoadFloat3(&scale));
+
+	// Creamos el world matrix para el cubo 1, primero realizamos la rotación para que sea en base al centro del objeto
+	XMMATRIX worldMat = rotMat * translationMat * scaleMat;
+
+	XMMATRIX wvpMat = worldMat * viewMat * projectionMat; // crear wvp matrix
+	XMMATRIX transposed = XMMatrixTranspose(wvpMat); // se debe pasar la transpuesta del wvp matrix para la gpu
+	XMStoreFloat4x4(&constBuffer.wvpMat, transposed); // guardamos el mvp matrix
+
+															 //Guardamos el world matrix en el constant buffer
+	XMStoreFloat4x4(&constBuffer.worldMat, XMMatrixTranspose(worldMat));
+
+	//copiamos los datos a la GPU
+	memcpy(constBufferGPUAddress, &constBuffer, sizeof(constBuffer));
 }
 
 void Mesh::Begin()
@@ -121,6 +184,7 @@ void Mesh::Begin()
 	context->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->SetVertexBuffer(0, vertexBufferView);
 	context->SetIndexBuffer(indexBufferView);
+	context->SetConstantBuffer(0, constBufferUploadHeap->GetGPUVirtualAddress());
 }
 
 void Mesh::Draw()

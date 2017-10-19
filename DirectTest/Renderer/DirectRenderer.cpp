@@ -125,13 +125,6 @@ namespace Renderer {
 			//Obtenemos su tamaño
 			rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-			// Describir y crear el constant buffer view (CBV) descriptor heap.
-			D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc = {};
-			cbvHeapDesc.NumDescriptors = 1;
-			cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-			cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-			ThrowIfFailed(device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&cbvHeap)));
-
 			// Describir y crear el shader resource view (SRV) descriptor heap.
 			D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
 			srvHeapDesc.NumDescriptors = 1;
@@ -326,7 +319,9 @@ namespace Renderer {
 			newMesh->SetVertices(vList, vecVList.size());
 			newMesh->SetIndices(iList, sizeof(iList) / sizeof(DWORD));
 
-			newMesh->Instanciate(device.Get(), commandList.Get());
+			newMesh->Initialize(device.Get(), commandList.Get());
+
+			newMesh->pos = XMFLOAT3(0.0f, 0.0f, -2.f);
 		}
 
 		//Crear el depth/stencil
@@ -427,39 +422,6 @@ namespace Renderer {
 			device->CreateShaderResourceView(textureBuffer.Get(), &srvDesc, srvHeap->GetCPUDescriptorHandleForHeapStart());
 		}
 
-		//Creamos el constant buffer
-		{
-
-			//Como es un dato que se actualiza constantemente, solo creamos un upload heap
-			device->CreateCommittedResource(
-				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-				D3D12_HEAP_FLAG_NONE,
-				&CD3DX12_RESOURCE_DESC::Buffer(1024 * 64), // Tamaño del buffer.Tiene que ser un multiplo de 64KB para una textura o constant buffer
-				D3D12_RESOURCE_STATE_GENERIC_READ,
-				nullptr,
-				IID_PPV_ARGS(&constBufferUploadHeap));
-
-			constBufferUploadHeap->SetName(L"Constant Buffer Upload Resource Heap");
-
-			ZeroMemory(&constantBufferData, sizeof(AppBuffer));
-
-			//Asignamos los datos
-			XMStoreFloat4x4(&constantBufferData.wvpMat, XMMatrixTranspose(XMMatrixIdentity()));
-			XMStoreFloat4x4(&constantBufferData.worldMat, XMMatrixTranspose(XMMatrixIdentity()));
-
-			CD3DX12_RANGE readRange(0, 0);    // No tenemos intencion de leer estos datos desde la CPU.
-
-			//Mapeamos para obtener la dirección de memoria del buffer en la GPU
-			ThrowIfFailed(constBufferUploadHeap->Map(0, &readRange, reinterpret_cast<void**>(&constBufferGPUAddress)));
-
-			//Copiamos los datos a esa dirección de memoria
-			memcpy(constBufferGPUAddress, &constantBufferData, sizeof(constantBufferData));
-			//Volvemos a hacer lo mismo para tener dos buffers alineados
-			memcpy(constBufferGPUAddress + constBufferAlignedSize, &constantBufferData, sizeof(constantBufferData));
-			constBufferUploadHeap->Unmap(0, nullptr);
-
-		}
-
 		//Crear los view y projection matrix
 		{
 			//Matrix de perspectiva
@@ -511,72 +473,14 @@ namespace Renderer {
 
 	void DirectRenderer::OnUpdate()
 	{
-		// Crear matrices de rotación
-		XMMATRIX rotXMat = XMMatrixRotationX(0.004f);
-		XMMATRIX rotYMat = XMMatrixRotationY(0.003f);
-		XMMATRIX rotZMat = XMMatrixRotationZ(0.002f);
-
-		// Añadimos la rotacion a la que ya tenia el cubo 1
-		XMMATRIX rotMat = XMLoadFloat4x4(&cubeRotMat) * rotXMat * rotYMat * rotZMat;
-		XMStoreFloat4x4(&cubeRotMat, rotMat);
-
-		//Crear el matrix de traslacion a partir de la posicion del cubo 1
-		XMMATRIX translationMat = XMMatrixTranslationFromVector(XMLoadFloat4(&cubePosition));
-
-		//Crear un matrix de escala para el cubo 1
-
-		XMMATRIX scaleMat = XMMatrixScaling(2.0f, 2.0f, 2.0f);
-
-		// Creamos el world matrix para el cubo 1, primero realizamos la rotación para que sea en base al centro del objeto
-		XMMATRIX worldMat = rotMat * translationMat * scaleMat;
-
-		// guardamos el world matrix del cubo uno
-		XMStoreFloat4x4(&cubeWorldMat, worldMat);
-
-		// actualizar el constant buffer para el cubo 1
-		// crear el mvp matrix y guardarlo en el constant buffer
-		XMMATRIX translationOffsetMat = XMMatrixTranslationFromVector(XMLoadFloat4(&cubePosition));
 		XMMATRIX viewMat = XMLoadFloat4x4(&cameraViewMat); // load view matrix
 		XMMATRIX projMat = XMLoadFloat4x4(&cameraProjMat); // load projection matrix
-		XMMATRIX wvpMat = XMLoadFloat4x4(&cubeWorldMat) * viewMat * projMat; // crear wvp matrix
-		XMMATRIX transposed = XMMatrixTranspose(wvpMat); // se debe pasar la transpuesta del wvp matrix para la gpu
-		XMStoreFloat4x4(&constantBufferData.wvpMat, transposed); // guardamos el mvp matrix
+		
+		newMesh->Update(viewMat, projMat);
 
-		//Guardamos el world matrix en el constant buffer
-		XMStoreFloat4x4(&constantBufferData.worldMat, XMMatrixTranspose(worldMat));
-
-		//copiamos los datos a la GPU
-		memcpy(constBufferGPUAddress, &constantBufferData, sizeof(constantBufferData));
-
-		//Mismo proceso para el cubo 2
-		rotXMat = XMMatrixRotationX(0.002f);
-		rotYMat = XMMatrixRotationY(0.003f);
-		rotZMat = XMMatrixRotationZ(0.001f);
-
-		// rotacion
-		rotMat = (XMLoadFloat4x4(&cube2RotMat) * (rotXMat * rotYMat * rotZMat));
-		XMStoreFloat4x4(&cube2RotMat, rotMat);
-
-		// traslacion
-		translationMat = XMMatrixTranslationFromVector(XMLoadFloat4(&cube2Pos));
-
-		// escala
-		scaleMat = XMMatrixScaling(0.5f, 0.5f, 0.5f);
-
-		//World matrix
-		worldMat = rotMat * scaleMat * translationMat;
-
-		//WVP matrix
-		wvpMat = XMLoadFloat4x4(&cube2WorldMat) * viewMat * projMat;
-		transposed = XMMatrixTranspose(wvpMat);
-		XMStoreFloat4x4(&constantBufferData.wvpMat, transposed);
-
-		XMStoreFloat4x4(&constantBufferData.worldMat, XMMatrixTranspose(worldMat));
-
-		//Guardamos en GPU
-		memcpy(constBufferGPUAddress + constBufferAlignedSize, &constantBufferData, sizeof(constantBufferData));
-
-		XMStoreFloat4x4(&cube2WorldMat, worldMat);
+		newMesh->rotation.x += 0.001f;
+		newMesh->rotation.y += 0.002f;
+		newMesh->rotation.z += 0.003f;
 	}
 
 	bool DirectRenderer::OnRender()
@@ -791,12 +695,6 @@ namespace Renderer {
 		commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 		
 		newMesh->Begin();
-
-		SetConstantBuffer(0, constBufferUploadHeap->GetGPUVirtualAddress());
-
-		newMesh->Draw();
-
-		SetConstantBuffer(0, constBufferUploadHeap->GetGPUVirtualAddress() + constBufferAlignedSize);
 
 		newMesh->Draw();
 
