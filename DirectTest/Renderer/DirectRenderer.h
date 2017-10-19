@@ -1,5 +1,6 @@
 #pragma once
-#include "../Core/RootSignature.h"
+#include "../Core/DirectX/RootSignature.h"
+#include "../Core/DirectX/PipelineState.h"
 #include <DirectXMath.h>
 #include <dxgi1_4.h>
 
@@ -63,7 +64,7 @@ private:
 	UINT rtvDescriptorSize; //Tamaño de nuestro rtv Descriptor
 	ComPtr<ID3D12DescriptorHeap> cbvHeap; //almacena la posición de nuestro constant buffer view
 	ComPtr<ID3D12DescriptorHeap> srvHeap; //almacena la posición de nuestro Shader Resource view
-	ComPtr<ID3D12PipelineState> pipelineState; //Representa el estado de todos los shaders que se han asignado
+	GraphicsPSO pipelineState; //Representa el estado de todos los shaders que se han asignado
 
 	ComPtr<ID3D12Resource> vertexBuffer; //El buffer encargado de cargar los vertices en la GPU
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView; //Una estructura que almacena la información de los vertices

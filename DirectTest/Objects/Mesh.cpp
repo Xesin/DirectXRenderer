@@ -1,5 +1,5 @@
 #include "Mesh.h"
-#include "../Core/DirectXHelper.h"
+#include "../Core/DirectX/DirectXHelper.h"
 #include "../Renderer/DirectRenderer.h"
 
 Mesh::Mesh() :

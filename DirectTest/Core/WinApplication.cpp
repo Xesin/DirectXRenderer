@@ -1,6 +1,6 @@
 
 #include "WinApplication.h"
-#include "DUtility.h"
+#include "Core.h"
 #include "../Renderer/DirectRenderer.h"
 
 #define MAX_LOADSTRING 100

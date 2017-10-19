@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXHelper.h"
+#include "Core.h"
 #include "WinApplication.h"
 
 class EngineState {

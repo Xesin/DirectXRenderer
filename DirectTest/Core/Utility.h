@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "DUtility.h"
+#include "Core.h"
 
 namespace Utility
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include "../Core/RootSignature.h"
+#include "../Core/DirectX/RootSignature.h"
 #include <wrl\client.h>
 
 struct Vertex;

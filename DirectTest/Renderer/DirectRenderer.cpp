@@ -1,6 +1,6 @@
 #include "DirectRenderer.h"
 #include "../Objects/Mesh.h"
-#include "../Core/DUtility.h"
+#include "../Core/Core.h"
 #include <d3dcompiler.h>
 
 Mesh* newMesh;
@@ -202,13 +202,6 @@ void DirectRenderer::LoadAssets()
 		{ "NORMAL", 0,  DXGI_FORMAT_R32G32B32_FLOAT, 0, 12 +8+16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
-	// Creamos el input layout description
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc = {};
-
-	// we can get the number of elements in an array by "sizeof(array) / sizeof(arrayElementType)"
-	inputLayoutDesc.NumElements = sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC);
-	inputLayoutDesc.pInputElementDescs = inputLayout;
-
 	// Creamos un pipeline state object (PSO)
 
 	//Tenemos un sampler
@@ -219,27 +212,19 @@ void DirectRenderer::LoadAssets()
 	CD3DX12_BLEND_DESC blendDesc(D3D12_DEFAULT);
 	blendDesc.AlphaToCoverageEnable = FALSE;
 
-	//Creamos y rellenamos la descripción del PSO
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {}; 
-	psoDesc.InputLayout = inputLayoutDesc;
-	psoDesc.pRootSignature = rootSignature.GetSignature();
-	psoDesc.VS = CD3DX12_SHADER_BYTECODE(pVertexShaderData, vertexShaderDataLength);
-	psoDesc.PS = CD3DX12_SHADER_BYTECODE(pPixelShaderData, pixelShaderDataLength);
-	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // Tipo de topologia a dibujar
-	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // formato del render target
-	psoDesc.SampleDesc = sampleDesc;
-	psoDesc.SampleMask = 0xffffffff; // sample mask has to do with multi-sampling. 0xffffffff means point sampling is done
-	psoDesc.RasterizerState = rasterDesc;
-	psoDesc.BlendState = blendDesc;
-	psoDesc.NumRenderTargets = 1; // solo vinculamos un render target
-	psoDesc.DepthStencilState = depthStencilDesc;
-	psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-
-	//Crear el PSO
-	ThrowIfFailed(device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState)));
+	pipelineState.SetInputLayout(4, inputLayout);
+	pipelineState.SetRootSignature(rootSignature);
+	pipelineState.SetVertexShader(CD3DX12_SHADER_BYTECODE(pVertexShaderData, vertexShaderDataLength));
+	pipelineState.SetPixelShader(CD3DX12_SHADER_BYTECODE(pPixelShaderData, pixelShaderDataLength));
+	pipelineState.SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	pipelineState.SetRenderTargetFormat(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_D32_FLOAT);
+	pipelineState.SetRasterizerState(rasterDesc);
+	pipelineState.SetBlendState(blendDesc);
+	pipelineState.SetDepthStencilState(depthStencilDesc);
+	pipelineState.Finalize();
 
 	// Crear el command list
-	ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[frameIndex].Get(), pipelineState.Get(), IID_PPV_ARGS(&commandList)));
+	ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[frameIndex].Get(), pipelineState.GetPipelineStateObject(), IID_PPV_ARGS(&commandList)));
 
 	// Crear los objetos de sincronización
 	{
@@ -630,10 +615,10 @@ void DirectRenderer::PopulateCommandList()
 	ThrowIfFailed(commandAllocators[frameIndex]->Reset());
 
 	//Reiniciamos el commandlist
-	ThrowIfFailed(commandList->Reset(commandAllocators[frameIndex].Get(), pipelineState.Get()));
+	ThrowIfFailed(commandList->Reset(commandAllocators[frameIndex].Get(), pipelineState.GetPipelineStateObject()));
 
 	// Asignamos el root signature
-	commandList->SetGraphicsRootSignature(rootSignature.GetSignature());
+	commandList->SetGraphicsRootSignature(pipelineState.GetRootSignature().GetSignature());
 
 	// Asignamos el SRV Heap
 	ID3D12DescriptorHeap* descriptorHeaps[] = { srvHeap.Get() };

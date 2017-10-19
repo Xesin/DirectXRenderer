@@ -46,6 +46,12 @@
     <Filter Include="Resource Files\Shaders">
       <UniqueIdentifier>{8970841b-3a77-4548-813c-ca16bb491c94}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Core\DirectX">
+      <UniqueIdentifier>{134919bf-dcef-43e0-8e0e-b1b15c273a83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core\DirectX">
+      <UniqueIdentifier>{9159d6c9-d826-4440-b505-3da2efce3c53}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -69,9 +75,6 @@
     <ClInclude Include="Core\WinApplication.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\DirectXHelper.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer\Texture2D.h">
       <Filter>Header Files\Renderer</Filter>
     </ClInclude>
@@ -81,22 +84,28 @@
     <ClInclude Include="Core\ImageLoader.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\DUtility.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\d3dx12.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\RootSignature.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Utility.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Math\Common.h">
       <Filter>Header Files\Core\Math</Filter>
     </ClInclude>
     <ClInclude Include="Core\Hash.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\DirectX\DirectXHelper.h">
+      <Filter>Header Files\Core\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\DirectX\RootSignature.h">
+      <Filter>Header Files\Core\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\DirectX\d3dx12.h">
+      <Filter>Header Files\Core\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\DirectX\PipelineState.h">
+      <Filter>Header Files\Core\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Utility.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Core.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -122,11 +131,14 @@
     <ClCompile Include="Core\ImageLoader.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\RootSignature.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Utility.cpp">
       <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\DirectX\RootSignature.cpp">
+      <Filter>Source Files\Core\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\DirectX\PipelineState.cpp">
+      <Filter>Source Files\Core\DirectX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

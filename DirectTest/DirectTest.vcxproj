@@ -98,8 +98,7 @@
       <AdditionalDependencies>kernel32.lib;dxgi.lib;D3DCompiler.lib;d3d12.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
-      <ShaderType>
-      </ShaderType>
+      <ShaderType>Vertex</ShaderType>
       <EntryPointName>VSMain</EntryPointName>
       <ObjectFileOutput>Resources\ShaderLib\%(Filename).cso</ObjectFileOutput>
       <ShaderModel>5.0</ShaderModel>
@@ -124,8 +123,7 @@
       <AdditionalDependencies>kernel32.lib;dxgi.lib;D3DCompiler.lib;d3d12.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
-      <ShaderType>
-      </ShaderType>
+      <ShaderType>Vertex</ShaderType>
       <EntryPointName>VSMain</EntryPointName>
       <ShaderModel>5.0</ShaderModel>
       <ObjectFileOutput>Resources\ShaderLib\%(Filename).cso</ObjectFileOutput>
@@ -154,8 +152,7 @@
       <AdditionalDependencies>kernel32.lib;dxgi.lib;D3DCompiler.lib;d3d12.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
-      <ShaderType>
-      </ShaderType>
+      <ShaderType>Vertex</ShaderType>
       <EntryPointName>VSMain</EntryPointName>
       <ObjectFileOutput>Resources\ShaderLib\%(Filename).cso</ObjectFileOutput>
       <ShaderModel>5.0</ShaderModel>
@@ -184,8 +181,7 @@
       <AdditionalDependencies>kernel32.lib;dxgi.lib;D3DCompiler.lib;d3d12.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
-      <ShaderType>
-      </ShaderType>
+      <ShaderType>Vertex</ShaderType>
       <EntryPointName>VSMain</EntryPointName>
       <ObjectFileOutput>Resources\ShaderLib\%(Filename).cso</ObjectFileOutput>
       <ShaderModel>5.0</ShaderModel>
@@ -198,14 +194,15 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Core\d3dx12.h" />
-    <ClInclude Include="Core\DirectXHelper.h" />
-    <ClInclude Include="Core\DUtility.h" />
+    <ClInclude Include="Core\DirectX\d3dx12.h" />
+    <ClInclude Include="Core\DirectX\DirectXHelper.h" />
+    <ClInclude Include="Core\DirectX\PipelineState.h" />
+    <ClInclude Include="Core\DirectX\RootSignature.h" />
+    <ClInclude Include="Core\Core.h" />
     <ClInclude Include="Core\EngineState.h" />
     <ClInclude Include="Core\Hash.h" />
     <ClInclude Include="Core\ImageLoader.h" />
     <ClInclude Include="Core\Math\Common.h" />
-    <ClInclude Include="Core\RootSignature.h" />
     <ClInclude Include="Core\Utility.h" />
     <ClInclude Include="Core\WinApplication.h" />
     <ClInclude Include="Game1\TriangleGame.h" />
@@ -216,9 +213,10 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Core\DirectX\PipelineState.cpp" />
+    <ClCompile Include="Core\DirectX\RootSignature.cpp" />
     <ClCompile Include="Core\EngineState.cpp" />
     <ClCompile Include="Core\ImageLoader.cpp" />
-    <ClCompile Include="Core\RootSignature.cpp" />
     <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="Core\WinApplication.cpp" />
     <ClCompile Include="Game1\TriangleGame.cpp" />

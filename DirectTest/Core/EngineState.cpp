@@ -1,4 +1,4 @@
-#include "DUtility.h"
+#include "Core.h"
 
 EngineState::EngineState(UINT width, UINT height, std::wstring name) :
 	m_width(width),

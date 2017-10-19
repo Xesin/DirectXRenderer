@@ -20,7 +20,7 @@
 #define D3D12_GPU_VIRTUAL_ADDRESS_NULL      ((D3D12_GPU_VIRTUAL_ADDRESS)0)
 #define D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN   ((D3D12_GPU_VIRTUAL_ADDRESS)-1)
 
-#include "d3dx12.h"
+#include "DirectX/d3dx12.h"
 
 #include <cstdint>
 #include <cstdio>
@@ -33,7 +33,7 @@
 #include <wrl.h>
 #include <ppltasks.h>
 
-#include "DirectXHelper.h"
+#include "DirectX/DirectXHelper.h"
 #include "Math\Common.h"
 #include "WinApplication.h"
 #include "EngineState.h"
