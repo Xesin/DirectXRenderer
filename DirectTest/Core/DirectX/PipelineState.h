@@ -2,7 +2,6 @@
 
 #include "../Core.h"
 
-class CommandContext;
 class RootSignature;
 class VertexShader;
 class GeometryShader;
@@ -41,7 +40,6 @@ protected:
 
 class GraphicsPSO : public PSO
 {
-	friend class CommandContext;
 
 public:
 
@@ -83,7 +81,6 @@ private:
 
 class ComputePSO : public PSO
 {
-	friend class CommandContext;
 
 public:
 	ComputePSO();

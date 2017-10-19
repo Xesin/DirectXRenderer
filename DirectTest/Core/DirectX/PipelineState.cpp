@@ -10,6 +10,7 @@ using Math::IsAligned;
 
 using Microsoft::WRL::ComPtr;
 using namespace std;
+using namespace Renderer;
 
 static map< size_t, ComPtr<ID3D12PipelineState> > s_GraphicsPSOHashMap;
 static map< size_t, ComPtr<ID3D12PipelineState> > s_ComputePSOHashMap;
@@ -123,7 +124,7 @@ void GraphicsPSO::Finalize()
 
 	if (firstCompile)
 	{
-		ASSERT_SUCCEEDED(DirectRenderer::device->CreateGraphicsPipelineState(&m_PSODesc, MY_IID_PPV_ARGS(&m_PSO)));
+		ASSERT_SUCCEEDED(device->CreateGraphicsPipelineState(&m_PSODesc, MY_IID_PPV_ARGS(&m_PSO)));
 		s_GraphicsPSOHashMap[HashCode].Attach(m_PSO);
 	}
 	else
@@ -161,7 +162,7 @@ void ComputePSO::Finalize()
 
 	if (firstCompile)
 	{
-		ASSERT_SUCCEEDED(DirectRenderer::device->CreateComputePipelineState(&m_PSODesc, MY_IID_PPV_ARGS(&m_PSO)));
+		ASSERT_SUCCEEDED(device->CreateComputePipelineState(&m_PSODesc, MY_IID_PPV_ARGS(&m_PSO)));
 		s_ComputePSOHashMap[HashCode].Attach(m_PSO);
 	}
 	else

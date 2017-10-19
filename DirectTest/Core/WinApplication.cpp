@@ -5,13 +5,14 @@
 
 #define MAX_LOADSTRING 100
 
+using namespace Renderer;
+
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
 HWND WinApplication::m_hwnd = nullptr;
-DirectRenderer* WinApplication::renderer = nullptr;
 
 int WinApplication::Run(EngineState* engineApp, HINSTANCE hInstance , int nCmdShow)
 {

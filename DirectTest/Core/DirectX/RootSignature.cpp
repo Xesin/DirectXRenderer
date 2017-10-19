@@ -6,7 +6,9 @@
 #include <mutex>
 
 using namespace std;
+using namespace Renderer;
 using Microsoft::WRL::ComPtr;
+
 
 static std::map< size_t, ComPtr<ID3D12RootSignature> > s_RootSignatureHashMap;
 
@@ -140,7 +142,7 @@ void RootSignature::Finalize(const std::wstring& name, D3D12_ROOT_SIGNATURE_FLAG
 		ASSERT_SUCCEEDED(D3D12SerializeRootSignature(&RootDesc, D3D_ROOT_SIGNATURE_VERSION_1,
 			pOutBlob.GetAddressOf(), pErrorBlob.GetAddressOf()));
 
-		ASSERT_SUCCEEDED(DirectRenderer::device->CreateRootSignature(1, pOutBlob->GetBufferPointer(), pOutBlob->GetBufferSize(),
+		ASSERT_SUCCEEDED(device->CreateRootSignature(1, pOutBlob->GetBufferPointer(), pOutBlob->GetBufferSize(),
 			MY_IID_PPV_ARGS(&m_Signature)));
 
 		m_Signature->SetName(name.c_str());
