@@ -101,8 +101,12 @@
       <ShaderType>
       </ShaderType>
       <EntryPointName>VSMain</EntryPointName>
-      <ObjectFileOutput>Resources\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>Resources\ShaderLib\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel>5.0</ShaderModel>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>xcopy /s /i /q /y $(ProjectDir)Resources\* $(TargetDir)Resources</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -124,8 +128,11 @@
       </ShaderType>
       <EntryPointName>VSMain</EntryPointName>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput>Resources\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>Resources\ShaderLib\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>xcopy /s /i /q /y $(ProjectDir)Resources\* $(TargetDir)Resources</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -150,8 +157,12 @@
       <ShaderType>
       </ShaderType>
       <EntryPointName>VSMain</EntryPointName>
-      <ObjectFileOutput>Resources\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>Resources\ShaderLib\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel>5.0</ShaderModel>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>xcopy /s /i /q /y $(ProjectDir)Resources\* $(TargetDir)Resources</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -176,21 +187,29 @@
       <ShaderType>
       </ShaderType>
       <EntryPointName>VSMain</EntryPointName>
-      <ObjectFileOutput>Resources\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>Resources\ShaderLib\%(Filename).cso</ObjectFileOutput>
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>xcopy /s /i /q /y $(ProjectDir)Resources\* $(TargetDir)Resources</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\d3dx12.h" />
     <ClInclude Include="Core\DirectXHelper.h" />
+    <ClInclude Include="Core\DUtility.h" />
     <ClInclude Include="Core\EngineState.h" />
+    <ClInclude Include="Core\Hash.h" />
     <ClInclude Include="Core\ImageLoader.h" />
+    <ClInclude Include="Core\Math\Common.h" />
+    <ClInclude Include="Core\RootSignature.h" />
+    <ClInclude Include="Core\Utility.h" />
     <ClInclude Include="Core\WinApplication.h" />
     <ClInclude Include="Game1\TriangleGame.h" />
     <ClInclude Include="Objects\Mesh.h" />
-    <ClInclude Include="Renderer\d3dx12.h" />
     <ClInclude Include="Renderer\DirectRenderer.h" />
     <ClInclude Include="Renderer\Texture2D.h" />
     <ClInclude Include="resource.h" />
@@ -199,19 +218,13 @@
   <ItemGroup>
     <ClCompile Include="Core\EngineState.cpp" />
     <ClCompile Include="Core\ImageLoader.cpp" />
+    <ClCompile Include="Core\RootSignature.cpp" />
+    <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="Core\WinApplication.cpp" />
     <ClCompile Include="Game1\TriangleGame.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Objects\Mesh.cpp" />
     <ClCompile Include="Renderer\DirectRenderer.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Resources\PixelShader.hlsl">
-      <FileType>Document</FileType>
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PSMain</EntryPointName>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\DirectTest.ico" />
@@ -221,12 +234,45 @@
     <ResourceCompile Include="Resources\DirectTest.rc" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resources\VertexShader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    <FxCompile Include="Shaders\PixelShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">PSMain</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">PSMain</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PSMain</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PSMain</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\TextPixelShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">PSMain</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">PSMain</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PSMain</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PSMain</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\TextVertexShader.hlsl">
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shaders\VertexShader.hlsl">
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

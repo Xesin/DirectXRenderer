@@ -37,6 +37,15 @@
     <Filter Include="Source Files\Objects">
       <UniqueIdentifier>{36b389a0-4e1c-4a55-b175-9f5080a995e9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Core\Math">
+      <UniqueIdentifier>{ae2c3201-1911-44c3-8182-9315651a651e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Core\Math">
+      <UniqueIdentifier>{83876d18-fb90-4f85-91dc-13cea0792f3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders">
+      <UniqueIdentifier>{8970841b-3a77-4548-813c-ca16bb491c94}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -66,13 +75,28 @@
     <ClInclude Include="Renderer\Texture2D.h">
       <Filter>Header Files\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\d3dx12.h">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Objects\Mesh.h">
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Core\ImageLoader.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\DUtility.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\d3dx12.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\RootSignature.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Utility.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Math\Common.h">
+      <Filter>Header Files\Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Hash.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -98,6 +122,12 @@
     <ClCompile Include="Core\ImageLoader.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\RootSignature.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Utility.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\small.ico">
@@ -113,11 +143,17 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resources\VertexShader.hlsl">
-      <Filter>Resource Files</Filter>
+    <FxCompile Include="Shaders\TextPixelShader.hlsl">
+      <Filter>Resource Files\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\PixelShader.hlsl">
-      <Filter>Resource Files</Filter>
+    <FxCompile Include="Shaders\TextVertexShader.hlsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\VertexShader.hlsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PixelShader.hlsl">
+      <Filter>Resource Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

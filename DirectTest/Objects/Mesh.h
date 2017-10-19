@@ -1,7 +1,6 @@
 #pragma once
-#include "../Core/WinApplication.h"
+#include "../Core/RootSignature.h"
 #include <wrl\client.h>
-#include <d3d12.h>
 
 struct Vertex;
 

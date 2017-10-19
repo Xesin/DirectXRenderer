@@ -1,13 +1,11 @@
 #include "DirectRenderer.h"
-#include "../Core/DirectXHelper.h"
 #include "../Objects/Mesh.h"
-#include "../Core/ImageLoader.h"
+#include "../Core/DUtility.h"
 #include <d3dcompiler.h>
-#include "d3dx12.h"
 
 Mesh* newMesh;
 using namespace DirectX;
-
+ComPtr<ID3D12Device> DirectRenderer::device = nullptr;
 DirectRenderer::DirectRenderer(UINT width, UINT height) :
 	frameIndex(0),
 	viewport(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height)),
@@ -162,27 +160,10 @@ void DirectRenderer::LoadPipeline()
 // Cargar los assets para el ejemplo.
 void DirectRenderer::LoadAssets()
 {
-	D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
-
-	// This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
-	featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
-
-	if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
-	{
-		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
-	}
-
-	// Crear el descriptor range y rellenarlo
-	CD3DX12_DESCRIPTOR_RANGE1  descriptorTableRanges[1]; // Por ahora solo un range
-	descriptorTableRanges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_NONE, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND);
-
-	// crear un root parameter para el root descriptor y rellenarlo
-	CD3DX12_ROOT_PARAMETER1  rootParameters[2]; // dos root parameters
-	rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX);
-	rootParameters[1].InitAsDescriptorTable(_countof(descriptorTableRanges), &descriptorTableRanges[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	rootSignature.Reset(2, 1);
 
 	//Creamos un sampler desc para nuestro sampler estatico
-	D3D12_STATIC_SAMPLER_DESC sampler = {};
+	D3D12_SAMPLER_DESC sampler = {};
 	sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
 	sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -190,31 +171,14 @@ void DirectRenderer::LoadAssets()
 	sampler.MipLODBias = 0;
 	sampler.MaxAnisotropy = 0;
 	sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-	sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
 	sampler.MinLOD = 0.0f;
 	sampler.MaxLOD = D3D12_FLOAT32_MAX;
-	sampler.ShaderRegister = 0;
-	sampler.RegisterSpace = 0;
-	sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init_1_1(_countof(rootParameters),
-		rootParameters,
-		1,
-		&sampler,
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | //Podemos denegar el acceso a ciertas etapas para mejor rendimiento
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS);
-	
-	ID3DBlob* signature;
+	rootSignature.InitStaticSampler(0, sampler, D3D12_SHADER_VISIBILITY_PIXEL);
+	rootSignature[0].InitAsConstantBuffer(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	rootSignature[1].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 
-	//Comprobamos que se puede deserializar (para saber si es correcta)
-	
-	ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, featureData.HighestVersion, &signature, nullptr));
-
-	//Creamos el root signature
-	ThrowIfFailed(device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
+	rootSignature.Finalize(L"Cube render", D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 
 	//Cargamos los shaders previamente compilados por el compilador de HLSL
@@ -224,9 +188,9 @@ void DirectRenderer::LoadAssets()
 	UINT pixelShaderDataLength;
 
 	//Cargamos el vertex shader
-	ThrowIfFailed(ReadDataFromFile(L"Resources/VertexShader.cso", &pVertexShaderData, &vertexShaderDataLength));
+	ThrowIfFailed(ReadDataFromFile(L"Resources\\ShaderLib\\VertexShader.cso", &pVertexShaderData, &vertexShaderDataLength));
 	//Cargamos el pixel shader
-	ThrowIfFailed(ReadDataFromFile(L"Resources/PixelShader.cso", &pPixelShaderData, &pixelShaderDataLength));
+	ThrowIfFailed(ReadDataFromFile(L"Resources\\ShaderLib\\PixelShader.cso", &pPixelShaderData, &pixelShaderDataLength));
 
 	// Creamos el input layout, esto describe el input que espera tener el vertex shader
 
@@ -258,7 +222,7 @@ void DirectRenderer::LoadAssets()
 	//Creamos y rellenamos la descripción del PSO
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {}; 
 	psoDesc.InputLayout = inputLayoutDesc;
-	psoDesc.pRootSignature = rootSignature.Get();
+	psoDesc.pRootSignature = rootSignature.GetSignature();
 	psoDesc.VS = CD3DX12_SHADER_BYTECODE(pVertexShaderData, vertexShaderDataLength);
 	psoDesc.PS = CD3DX12_SHADER_BYTECODE(pPixelShaderData, pixelShaderDataLength);
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // Tipo de topologia a dibujar
@@ -669,7 +633,7 @@ void DirectRenderer::PopulateCommandList()
 	ThrowIfFailed(commandList->Reset(commandAllocators[frameIndex].Get(), pipelineState.Get()));
 
 	// Asignamos el root signature
-	commandList->SetGraphicsRootSignature(rootSignature.Get());
+	commandList->SetGraphicsRootSignature(rootSignature.GetSignature());
 
 	// Asignamos el SRV Heap
 	ID3D12DescriptorHeap* descriptorHeaps[] = { srvHeap.Get() };

@@ -1,12 +1,8 @@
 #pragma once
-#include <d3d12.h>
+#include "../Core/RootSignature.h"
 #include <DirectXMath.h>
 #include <dxgi1_4.h>
-#include <wrl\client.h>
-#include <vector>
-#include "d3dx12.h"
 
-using namespace Microsoft::WRL;
 using namespace DirectX;
 
 const bool FULL_SCREEN = false;
@@ -50,6 +46,7 @@ private:
 	float aspectRatio;
 public:
 	bool useWarpDevice;
+	static ComPtr<ID3D12Device> device; //Representa un adaptador virtual. Sirve para crear command lists, queues, fences...
 
 private:
 	static const UINT FRAME_COUNT = 2; //Numero de frames que usamos para renderizar (2 = doble buffer)
@@ -57,12 +54,11 @@ private:
 	CD3DX12_VIEWPORT viewport;
 	CD3DX12_RECT scissorRect; //Rect en el que se va a pintar
 	ComPtr<IDXGISwapChain3> swapChain; //Objeto que intercala el back buffer para presentarlo por pantalla
-	ComPtr<ID3D12Device> device; //Representa un adaptador virtual. Sirve para crear command lists, queues, fences...
 	ComPtr<ID3D12Resource> renderTargets[FRAME_COUNT]; //Tenemos un render target por cada frame (Double buffer)
 	ComPtr<ID3D12CommandAllocator> commandAllocators[FRAME_COUNT]; //el command allocator representa el almacenamiento de los GPU commands
 	ComPtr<ID3D12CommandQueue> commandQueue; //Provee metodos para enviar command lists, sincronizar la ejecución de command lists...
 	ComPtr<ID3D12GraphicsCommandList> commandList; //Encapsula una lista de comandos que tiene que ejecutar la GPU
-	ComPtr<ID3D12RootSignature> rootSignature; //Define que recursos están vinculados a la graphic pipeline.
+	RootSignature rootSignature; //Define que recursos están vinculados a la graphic pipeline.
 	ComPtr<ID3D12DescriptorHeap> rtvHeap; //almacena la posición de nuestro render target view
 	UINT rtvDescriptorSize; //Tamaño de nuestro rtv Descriptor
 	ComPtr<ID3D12DescriptorHeap> cbvHeap; //almacena la posición de nuestro constant buffer view

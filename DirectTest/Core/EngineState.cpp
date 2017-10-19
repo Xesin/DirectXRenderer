@@ -1,9 +1,4 @@
-#include "EngineState.h"
-#include "DirectXHelper.h"
-#include "WinApplication.h"
-#include <wrl\client.h>
-
-using namespace Microsoft::WRL;
+#include "DUtility.h"
 
 EngineState::EngineState(UINT width, UINT height, std::wstring name) :
 	m_width(width),
