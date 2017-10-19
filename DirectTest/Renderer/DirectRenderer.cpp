@@ -203,10 +203,6 @@ void DirectRenderer::LoadAssets()
 	};
 
 	// Creamos un pipeline state object (PSO)
-
-	//Tenemos un sampler
-	DXGI_SAMPLE_DESC sampleDesc = {};
-	sampleDesc.Count = 1;
 	CD3DX12_RASTERIZER_DESC rasterDesc(D3D12_DEFAULT);
 	CD3DX12_DEPTH_STENCIL_DESC depthStencilDesc(D3D12_DEFAULT);
 	CD3DX12_BLEND_DESC blendDesc(D3D12_DEFAULT);

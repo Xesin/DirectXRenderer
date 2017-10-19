@@ -14,7 +14,7 @@ struct VSInput
 	float3 normal : NORMAL;
 };
 
-cbuffer AppConstBuffer : register(b0)
+cbuffer PerVertexData : register(b0)
 {
     float4x4 wvpMat;
 	float4x4 worldMat;

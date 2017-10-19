@@ -18,7 +18,7 @@ struct PSInput
 };
 
 Texture2D g_texture : register(t0);
-SamplerState g_sampler : register(s0);
+sampler g_sampler : register(s0);
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
