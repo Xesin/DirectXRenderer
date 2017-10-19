@@ -72,6 +72,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -104,7 +106,7 @@
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy /s /i /q /y $(ProjectDir)Resources\* $(TargetDir)Resources</Command>
+      <Command>xcopy /s /i /q /y "$(ProjectDir)Resources\*" "$(TargetDir)Resources"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -129,7 +131,7 @@
       <ObjectFileOutput>Resources\ShaderLib\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy /s /i /q /y $(ProjectDir)Resources\* $(TargetDir)Resources</Command>
+      <Command>xcopy /s /i /q /y "$(ProjectDir)Resources\*" "$(TargetDir)Resources"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -1,7 +1,6 @@
 #include "PipelineState.h"
 #include "RootSignature.h"
 #include "../../Renderer/DirectRenderer.h"
-#include "../Hash.h"
 #include <map>
 #include <thread>
 #include <mutex>
