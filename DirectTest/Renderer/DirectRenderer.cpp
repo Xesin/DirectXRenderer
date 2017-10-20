@@ -2,9 +2,11 @@
 #include "../Objects/Mesh.h"
 #include "../Core/Core.h"
 #include <d3dcompiler.h>
-
+#include "../Core/Materials/StandardMaterial.h"
 Mesh* newMesh;
 Mesh* newMesh2;
+StandardMaterial* mat;
+
 using namespace DirectX;
 
 namespace Renderer {
@@ -125,13 +127,6 @@ namespace Renderer {
 
 			//Obtenemos su tamaño
 			rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-			// Describir y crear el shader resource view (SRV) descriptor heap.
-			D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-			srvHeapDesc.NumDescriptors = 1;
-			srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-			srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-			ThrowIfFailed(device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap)));
 		}
 
 		// Create frame resources.
@@ -158,65 +153,6 @@ namespace Renderer {
 	// Cargar los assets para el ejemplo.
 	void DirectRenderer::LoadAssets()
 	{
-		rootSignature.Reset(2, 1);
-
-		//Creamos un sampler desc para nuestro sampler estatico
-		D3D12_SAMPLER_DESC sampler = {};
-		sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-		sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		sampler.MipLODBias = 0;
-		sampler.MaxAnisotropy = 0;
-		sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-		sampler.MinLOD = 0.0f;
-		sampler.MaxLOD = D3D12_FLOAT32_MAX;
-
-		rootSignature.InitStaticSampler(0, sampler, D3D12_SHADER_VISIBILITY_PIXEL);
-		rootSignature[0].InitAsConstantBuffer(0, D3D12_SHADER_VISIBILITY_VERTEX);
-		rootSignature[1].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
-
-		rootSignature.Finalize(L"Cube render", D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-
-
-		//Cargamos los shaders previamente compilados por el compilador de HLSL
-		UINT8* pVertexShaderData;
-		UINT vertexShaderDataLength;
-		UINT8* pPixelShaderData;
-		UINT pixelShaderDataLength;
-
-		//Cargamos el vertex shader
-		ThrowIfFailed(ReadDataFromFile(L"Resources\\ShaderLib\\VertexShader.cso", &pVertexShaderData, &vertexShaderDataLength));
-		//Cargamos el pixel shader
-		ThrowIfFailed(ReadDataFromFile(L"Resources\\ShaderLib\\PixelShader.cso", &pPixelShaderData, &pixelShaderDataLength));
-
-		// Creamos el input layout, esto describe el input que espera tener el vertex shader
-
-		D3D12_INPUT_ELEMENT_DESC inputLayout[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12 + 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 0,  DXGI_FORMAT_R32G32B32_FLOAT, 0, 12 + 8 + 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-		};
-
-		// Creamos un pipeline state object (PSO)
-		CD3DX12_RASTERIZER_DESC rasterDesc(D3D12_DEFAULT);
-		CD3DX12_DEPTH_STENCIL_DESC depthStencilDesc(D3D12_DEFAULT);
-		CD3DX12_BLEND_DESC blendDesc(D3D12_DEFAULT);
-		blendDesc.AlphaToCoverageEnable = FALSE;
-
-		pipelineState.SetInputLayout(4, inputLayout);
-		pipelineState.SetRootSignature(rootSignature);
-		pipelineState.SetVertexShader(CD3DX12_SHADER_BYTECODE(pVertexShaderData, vertexShaderDataLength));
-		pipelineState.SetPixelShader(CD3DX12_SHADER_BYTECODE(pPixelShaderData, pixelShaderDataLength));
-		pipelineState.SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-		pipelineState.SetRenderTargetFormat(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_D32_FLOAT);
-		pipelineState.SetRasterizerState(rasterDesc);
-		pipelineState.SetBlendState(blendDesc);
-		pipelineState.SetDepthStencilState(depthStencilDesc);
-		pipelineState.Finalize();
-
 		// Crear el command list
 		ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[frameIndex].Get(), nullptr, IID_PPV_ARGS(&commandList)));
 
@@ -316,7 +252,7 @@ namespace Renderer {
 			//Cantidad de indices de cada cubo
 			numCubeIndices = sizeof(iList) / sizeof(DWORD);
 
-			newMesh = new Mesh(this);
+			newMesh = new Mesh(this, nullptr);
 			newMesh->SetVertices(vList, vecVList.size());
 			newMesh->SetIndices(iList, sizeof(iList) / sizeof(DWORD));
 
@@ -324,7 +260,7 @@ namespace Renderer {
 
 			newMesh->pos = XMFLOAT3(0.0f, 0.0f, -2.f);
 
-			newMesh2 = new Mesh(this);
+			newMesh2 = new Mesh(this, nullptr);
 			newMesh2->SetVertices(vList, vecVList.size());
 			newMesh2->SetIndices(iList, sizeof(iList) / sizeof(DWORD));
 
@@ -367,70 +303,7 @@ namespace Renderer {
 			device->CreateDepthStencilView(depthStencilBuffer.Get(), &depthStencilDesc, dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 		}
 
-		ComPtr<ID3D12Resource> textureUploadHeap;
-		//Creamos la textura
-		{
-			int imageBytesPerRow;
-			Image imageData;
-			ZeroMemory(&imageData, sizeof(Image));
-			ImageLoader::LoadImageFromFile(L"Resources/woodTexture.jpg", imageBytesPerRow, &imageData);
-
-
-			// Creamos la descripcion
-			D3D12_RESOURCE_DESC textureDesc = {};
-			textureDesc.MipLevels = 1;
-			textureDesc.Format = imageData.dxgiFormat;
-			textureDesc.Width = imageData.textureWidth;
-			textureDesc.Height = imageData.textureHeight;
-			textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-			textureDesc.DepthOrArraySize = 1;
-			textureDesc.SampleDesc.Count = 1;
-			textureDesc.SampleDesc.Quality = 0;
-			textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-
-			//Mismo proceso que antes, primero un heap de tipo default
-			ThrowIfFailed(device->CreateCommittedResource(
-				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-				D3D12_HEAP_FLAG_NONE,
-				&textureDesc,
-				D3D12_RESOURCE_STATE_COPY_DEST,
-				nullptr,
-				IID_PPV_ARGS(&textureBuffer)));
-
-
-			UINT64 textureUploadBufferSize;
-
-			//Esta funcion obtiene el tamaño del buffer que necesitamos
-			device->GetCopyableFootprints(&textureDesc, 0, 1, 0, nullptr, nullptr, nullptr, &textureUploadBufferSize);
-
-			// Ahora podemos crear el upload heap
-			ThrowIfFailed(device->CreateCommittedResource(
-				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-				D3D12_HEAP_FLAG_NONE,
-				&CD3DX12_RESOURCE_DESC::Buffer(textureUploadBufferSize),
-				D3D12_RESOURCE_STATE_GENERIC_READ,
-				nullptr,
-				IID_PPV_ARGS(&textureUploadHeap)));
-			textureUploadHeap->SetName(L"Texture Buffer Upload Resource Heap");
-
-			D3D12_SUBRESOURCE_DATA textureData = {};
-			textureData.pData = &imageData.imageData[0];
-			textureData.RowPitch = imageBytesPerRow;
-			textureData.SlicePitch = textureData.RowPitch * imageData.textureHeight;
-
-			//Copiamos la textura al default heap
-			UpdateSubresources(commandList.Get(), textureBuffer.Get(), textureUploadHeap.Get(), 0, 0, 1, &textureData);
-
-			commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(textureBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
-
-			// Describimos y creamos el SRV para la textura
-			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-			srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			srvDesc.Format = textureDesc.Format;
-			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-			srvDesc.Texture2D.MipLevels = 1;
-			device->CreateShaderResourceView(textureBuffer.Get(), &srvDesc, srvHeap->GetCPUDescriptorHandleForHeapStart());
-		}
+		mat = new StandardMaterial(this);
 
 		//Crear los view y projection matrix
 		{
@@ -660,18 +533,7 @@ namespace Renderer {
 		//Reiniciamos el commandlist
 		ThrowIfFailed(commandList->Reset(commandAllocators[frameIndex].Get(), nullptr));
 
-		//Asignamos el PSO
-		SetPipelineState(pipelineState);
-		// Asignamos el root signature
-		SetRootSignature(rootSignature);
-
-		// Asignamos el SRV Heap
-		ID3D12DescriptorHeap* descriptorHeaps[] = { srvHeap.Get() };
-		commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
-
-		// Asignamos el descriptor table
-		SetDescriptorTable(1, srvHeap->GetGPUDescriptorHandleForHeapStart());
+		mat->BeginRender();
 
 		//Asignamos el viewport y el scissorRect
 		SetViewportAndScissor(viewport, scissorRect);

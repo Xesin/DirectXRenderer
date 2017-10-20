@@ -52,6 +52,12 @@
     <Filter Include="Source Files\Core\DirectX">
       <UniqueIdentifier>{9159d6c9-d826-4440-b505-3da2efce3c53}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Core\Materials">
+      <UniqueIdentifier>{52286cfa-8507-44fd-9221-75d072402c23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core\Materials">
+      <UniqueIdentifier>{f42d7b68-b9da-47d0-8f9e-34fe3a954c1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -108,6 +114,12 @@
     <ClInclude Include="Core\Core.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Materials\Material.h">
+      <Filter>Header Files\Core\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Materials\StandardMaterial.h">
+      <Filter>Header Files\Core\Materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer\DirectRenderer.cpp">
@@ -139,6 +151,9 @@
     </ClCompile>
     <ClCompile Include="Core\DirectX\PipelineState.cpp">
       <Filter>Source Files\Core\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Materials\StandardMaterial.cpp">
+      <Filter>Source Files\Core\Materials</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

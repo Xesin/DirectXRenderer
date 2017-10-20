@@ -33,10 +33,10 @@
 #include <wrl.h>
 #include <ppltasks.h>
 
-#include "DirectX/DirectXHelper.h"
-
 #include "Math\Common.h"
 #include "WinApplication.h"
+#include "DirectX\DirectXHelper.h"
+#include "Materials\Material.h"
 #include "EngineState.h"
 #include "ImageLoader.h"
 #include "Utility.h"

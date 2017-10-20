@@ -202,6 +202,8 @@
     <ClInclude Include="Core\EngineState.h" />
     <ClInclude Include="Core\Hash.h" />
     <ClInclude Include="Core\ImageLoader.h" />
+    <ClInclude Include="Core\Materials\Material.h" />
+    <ClInclude Include="Core\Materials\StandardMaterial.h" />
     <ClInclude Include="Core\Math\Common.h" />
     <ClInclude Include="Core\Utility.h" />
     <ClInclude Include="Core\WinApplication.h" />
@@ -217,6 +219,7 @@
     <ClCompile Include="Core\DirectX\RootSignature.cpp" />
     <ClCompile Include="Core\EngineState.cpp" />
     <ClCompile Include="Core\ImageLoader.cpp" />
+    <ClCompile Include="Core\Materials\StandardMaterial.cpp" />
     <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="Core\WinApplication.cpp" />
     <ClCompile Include="Game1\TriangleGame.cpp" />

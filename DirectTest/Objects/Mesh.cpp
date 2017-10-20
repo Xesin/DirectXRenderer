@@ -1,14 +1,16 @@
 #include "Mesh.h"
 
 using namespace Renderer;
+using namespace Microsoft::WRL;
 
-Mesh::Mesh(DirectRenderer* context) :
+Mesh::Mesh(DirectRenderer* context, Material* material) :
 	vertexBuffer(nullptr),
 	indexBuffer(nullptr),
 	numVertices(0),
 	numIndices(0),
 	instanciated(false),
-	context(context)
+	context(context),
+	material(material)
 {
 	ZeroMemory(&constBuffer, sizeof(AppBuffer));
 	scale = XMFLOAT3(1.f, 1.f, 1.f);
@@ -194,5 +196,4 @@ void Mesh::Draw()
 
 void Mesh::End()
 {
-
 }

@@ -5,8 +5,6 @@
 
 struct Vertex;
 
-
-using namespace Microsoft::WRL;
 namespace Renderer {
 	class DirectRenderer;
 }
@@ -16,7 +14,7 @@ using namespace DirectX;
 
 class Mesh {
 public:
-	Mesh(DirectRenderer* context);
+	Mesh(DirectRenderer* context, Material* material);
 	void SetVertices(Vertex* vertList, UINT numVertices);
 	void SetIndices(DWORD* indicesList, UINT numIndices);
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
@@ -35,6 +33,7 @@ public:
 	XMFLOAT3 rotation;
 
 	AppBuffer constBuffer;
+	Material* material;
 	int constBufferAlignedSize = (sizeof(constBuffer) + 255) & ~255; // Necesitamos que el buffer sea de bloques alineados de 256 bytes
 
 	ComPtr<ID3D12Resource> vertexBuffer; //El buffer encargado de cargar los vertices en la GPU
