@@ -1,6 +1,9 @@
 #pragma once
 
 #include "../Core.h"
+#ifndef HASH_INCLUDED
+#include "../Hash.h"
+#endif
 
 class RootSignature;
 class VertexShader;
