@@ -34,6 +34,7 @@
 #include <ppltasks.h>
 
 #include "Math\Common.h"
+#include "VectorMath.h"
 #include "WinApplication.h"
 #include "DirectX\DirectXHelper.h"
 #include "Materials\Material.h"

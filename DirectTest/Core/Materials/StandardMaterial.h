@@ -6,6 +6,7 @@
 class StandardMaterial : public Material {
 public:
 	StandardMaterial(DirectRenderer* context);
+	~StandardMaterial();
 	virtual void BeginRender();
 	virtual void OnRender() {}
 	virtual void OnEndRender() {}

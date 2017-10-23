@@ -1,6 +1,5 @@
 #include "DirectRenderer.h"
 #include "../Objects/Mesh.h"
-#include "../Core/Core.h"
 #include <d3dcompiler.h>
 #include "../Core/Materials/StandardMaterial.h"
 #include "../Core/Time.h"
@@ -8,8 +7,6 @@
 Mesh* newMesh;
 Mesh* newMesh2;
 StandardMaterial* mat;
-
-using namespace DirectX;
 
 namespace Renderer {
 	ComPtr<ID3D12Device> device;
@@ -551,8 +548,7 @@ namespace Renderer {
 		SetRenderTargets(1, &rtvHandle, dsvHandle);
 
 		// Grabar los comandos
-		const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr); //Limpiamos el canvas
+		commandList->ClearRenderTargetView(rtvHandle, clearColor.GetPtr(), 0, nullptr); //Limpiamos el canvas
 
 		//Limpiamos el depth stencil
 		commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);

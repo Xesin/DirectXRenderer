@@ -1,9 +1,9 @@
 #pragma once
+#include <dxgi1_4.h>
 #include "../Core/DirectX/PipelineState.h"
 #include "../Core/DirectX/RootSignature.h"
-#include <DirectXMath.h>
-#include <dxgi1_4.h>
 #include "../Core/Core.h"
+#include "../Core/Color.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -135,6 +135,7 @@ namespace Renderer {
 		UINT width; //Ancho de la pantalla
 		UINT height; //Alto de la pantalla
 
+		Color clearColor = Color(0.3f, 0.2f, 0.4f, 1.0f);
 
 	};
 

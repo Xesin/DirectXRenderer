@@ -140,6 +140,12 @@ StandardMaterial::StandardMaterial(DirectRenderer * context) : Material(context)
 	}
 }
 
+StandardMaterial::~StandardMaterial()
+{
+	textureBuffer->Release();
+	delete textureBufferGPUAddress;
+}
+
 void StandardMaterial::BeginRender() {
 
 	//Asignamos el PSO
@@ -150,7 +156,6 @@ void StandardMaterial::BeginRender() {
 	// Asignamos el SRV Heap
 	ID3D12DescriptorHeap* descriptorHeaps[] = { srvHeap.Get() };
 	context->commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
 
 	// Asignamos el descriptor table
 	context->SetDescriptorTable(1, srvHeap->GetGPUDescriptorHandleForHeapStart());
