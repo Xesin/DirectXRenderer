@@ -30,7 +30,6 @@ int WinApplication::Run(EngineState* engineApp, HINSTANCE hInstance , int nCmdSh
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_DIRECTTEST));
 
-	EngineState* pSample = reinterpret_cast<EngineState*>(GetWindowLongPtr(GetHwnd(), GWLP_USERDATA));
 	MSG msg;
 	msg.message = WM_NULL;
 	while (msg.message != WM_QUIT) {
@@ -40,15 +39,21 @@ int WinApplication::Run(EngineState* engineApp, HINSTANCE hInstance , int nCmdSh
 			DispatchMessage(&msg);
 		}
 		else {
-			timer->Update();
-			pSample->OnUpdate();
-			renderer->OnUpdate();
-			pSample->OnRender();
-			renderer->OnRender();
+			Update();
 		}
 	}
 
 	return (int)msg.wParam;
+}
+
+void WinApplication::Update()
+{
+	EngineState* pSample = reinterpret_cast<EngineState*>(GetWindowLongPtr(GetHwnd(), GWLP_USERDATA));
+	timer->Update();
+	pSample->OnUpdate();
+	renderer->OnUpdate();
+
+	renderer->OnRender();
 }
 
 int WinApplication::InitInstance(HINSTANCE hInstance, int nCmdShow, EngineState* engineApp)
