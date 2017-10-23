@@ -1,3 +1,4 @@
+#include "EngineState.h"
 #include "Core.h"
 
 EngineState::EngineState(UINT width, UINT height, std::wstring name) :

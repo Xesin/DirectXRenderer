@@ -2,14 +2,14 @@
 #include "../Core.h"
 
 namespace Renderer {
-	class DirectRenderer;
+	class GraphicContext;
 }
 
 using namespace Renderer;
 
 class Material {
 public:
-	Material(DirectRenderer* context) : 
+	Material(GraphicContext* context) : 
 		context(context) 
 	{
 
@@ -19,5 +19,5 @@ public:
 	virtual void OnEndRender() = 0;
 
 protected:
-	DirectRenderer* context;
+	GraphicContext* context;
 };

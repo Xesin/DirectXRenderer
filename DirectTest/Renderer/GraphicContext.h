@@ -30,9 +30,9 @@ struct AppBuffer
 namespace Renderer {
 
 	extern ComPtr<ID3D12Device> device; //Representa un adaptador virtual. Sirve para crear command lists, queues, fences...
-	class DirectRenderer {
+	class GraphicContext {
 	public:
-		DirectRenderer(UINT width, UINT height);
+		GraphicContext(UINT width, UINT height);
 		void Initialize();
 		void OnUpdate();
 		bool OnRender();
@@ -139,5 +139,5 @@ namespace Renderer {
 
 	};
 
-	extern DirectRenderer* renderer;
+	extern GraphicContext* renderer;
 }

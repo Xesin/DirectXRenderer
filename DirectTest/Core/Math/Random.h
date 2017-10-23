@@ -21,7 +21,7 @@ namespace Math
     class RandomNumberGenerator
     {
     public:
-        RandomNumberGenerator() : generator(m_rd())
+        RandomNumberGenerator() : generator(randomDevice())
         {
         }
 

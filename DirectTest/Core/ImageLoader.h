@@ -13,9 +13,9 @@ class ImageLoader {
 
 public:
 	static int LoadImageFromFile(LPCWSTR filename, int &bytesPerRow, Image* outImage);
+	static int GetDXGIFormatBitsPerPixel(DXGI_FORMAT & dxgiFormat);
 private:
 	static void Initialize();
-	static int GetDXGIFormatBitsPerPixel(DXGI_FORMAT & dxgiFormat);
 	static WICPixelFormatGUID GetConvertToWICFormat(WICPixelFormatGUID & wicFormatGUID);
 	static DXGI_FORMAT GetDXGIFormatFromWICFormat(WICPixelFormatGUID & wicFormatGUID);
 

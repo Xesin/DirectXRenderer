@@ -1,8 +1,11 @@
-#include "DirectRenderer.h"
-#include "../Objects/Mesh.h"
+#include "GraphicContext.h"
 #include <d3dcompiler.h>
+
+#include "../Core/WinApplication.h"
+#include "../Objects/Mesh.h"
 #include "../Core/Materials/StandardMaterial.h"
 #include "../Core/Time.h"
+#include "../Core/GpuResource.h"
 
 Mesh* newMesh;
 Mesh* newMesh2;
@@ -10,9 +13,9 @@ StandardMaterial* mat;
 
 namespace Renderer {
 	ComPtr<ID3D12Device> device;
-	DirectRenderer* renderer;
+	GraphicContext* renderer;
 
-	DirectRenderer::DirectRenderer(UINT width, UINT height) :
+	GraphicContext::GraphicContext(UINT width, UINT height) :
 		frameIndex(0),
 		viewport(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height)),
 		scissorRect(0, 0, static_cast<LONG>(width), static_cast<LONG>(height)),
@@ -24,14 +27,14 @@ namespace Renderer {
 	{
 	}
 
-	void DirectRenderer::Initialize()
+	void GraphicContext::Initialize()
 	{
 		LoadPipeline();
 		LoadAssets();
 	}
 
 	// Cargar las dependencias de la rendering pipeline
-	void DirectRenderer::LoadPipeline()
+	void GraphicContext::LoadPipeline()
 	{
 		UINT dxgiFactoryFlags = 0;
 
@@ -150,7 +153,7 @@ namespace Renderer {
 	}
 
 	// Cargar los assets para el ejemplo.
-	void DirectRenderer::LoadAssets()
+	void GraphicContext::LoadAssets()
 	{
 		// Crear el command list
 		ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[frameIndex].Get(), nullptr, IID_PPV_ARGS(&commandList)));
@@ -338,7 +341,7 @@ namespace Renderer {
 
 	}
 
-	void DirectRenderer::OnUpdate()
+	void GraphicContext::OnUpdate()
 	{
 		XMMATRIX viewMat = XMLoadFloat4x4(&cameraViewMat); // load view matrix
 		XMMATRIX projMat = XMLoadFloat4x4(&cameraProjMat); // load projection matrix
@@ -354,7 +357,7 @@ namespace Renderer {
 		newMesh2->Update(viewMat, projMat);
 	}
 
-	bool DirectRenderer::OnRender()
+	bool GraphicContext::OnRender()
 	{
 		// Grabamos todos los comandos
 		PopulateCommandList();
@@ -372,19 +375,19 @@ namespace Renderer {
 		return true;
 	}
 
-	void DirectRenderer::Release()
+	void GraphicContext::Release()
 	{
 		MoveToNextFrame();
 
 		CloseHandle(fenceEvent);
 	}
 
-	void DirectRenderer::OnResize(UINT width, UINT height)
+	void GraphicContext::OnResize(UINT width, UINT height)
 	{
 		aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 	}
 
-	void DirectRenderer::SetRootSignature(const RootSignature & RootSig)
+	void GraphicContext::SetRootSignature(const RootSignature & RootSig)
 	{
 		if (RootSig.GetSignature() == currRootSignature)
 			return;
@@ -392,23 +395,23 @@ namespace Renderer {
 		commandList->SetGraphicsRootSignature(currRootSignature = RootSig.GetSignature());
 	}
 
-	void DirectRenderer::SetRenderTargets(UINT NumRTVs, const D3D12_CPU_DESCRIPTOR_HANDLE RTVs[])
+	void GraphicContext::SetRenderTargets(UINT NumRTVs, const D3D12_CPU_DESCRIPTOR_HANDLE RTVs[])
 	{
 		commandList->OMSetRenderTargets(NumRTVs, RTVs, FALSE, nullptr);
 	}
 
 
-	void DirectRenderer::SetRenderTargets(UINT NumRTVs, const D3D12_CPU_DESCRIPTOR_HANDLE RTVs[], D3D12_CPU_DESCRIPTOR_HANDLE DSV)
+	void GraphicContext::SetRenderTargets(UINT NumRTVs, const D3D12_CPU_DESCRIPTOR_HANDLE RTVs[], D3D12_CPU_DESCRIPTOR_HANDLE DSV)
 	{
 		commandList->OMSetRenderTargets(NumRTVs, RTVs, FALSE, &DSV);
 	}
 
-	void DirectRenderer::SetViewport(const D3D12_VIEWPORT & vp)
+	void GraphicContext::SetViewport(const D3D12_VIEWPORT & vp)
 	{
 		commandList->RSSetViewports(1, &vp);
 	}
 
-	void DirectRenderer::SetViewport(FLOAT x, FLOAT y, FLOAT w, FLOAT h, FLOAT minDepth, FLOAT maxDepth)
+	void GraphicContext::SetViewport(FLOAT x, FLOAT y, FLOAT w, FLOAT h, FLOAT minDepth, FLOAT maxDepth)
 	{
 		D3D12_VIEWPORT vp;
 		vp.Width = w;
@@ -420,41 +423,41 @@ namespace Renderer {
 		commandList->RSSetViewports(1, &vp);
 	}
 
-	void DirectRenderer::SetScissor(const D3D12_RECT & rect)
+	void GraphicContext::SetScissor(const D3D12_RECT & rect)
 	{
 		ASSERT(rect.left < rect.right && rect.top < rect.bottom);
 		commandList->RSSetScissorRects(1, &rect);
 	}
 
-	void DirectRenderer::SetScissor(UINT left, UINT top, UINT right, UINT bottom)
+	void GraphicContext::SetScissor(UINT left, UINT top, UINT right, UINT bottom)
 	{
 		SetScissor(CD3DX12_RECT(left, top, right, bottom));
 	}
 
-	void DirectRenderer::SetViewportAndScissor(const D3D12_VIEWPORT & vp, const D3D12_RECT & rect)
+	void GraphicContext::SetViewportAndScissor(const D3D12_VIEWPORT & vp, const D3D12_RECT & rect)
 	{
 		ASSERT(rect.left < rect.right && rect.top < rect.bottom);
 		commandList->RSSetViewports(1, &vp);
 		commandList->RSSetScissorRects(1, &rect);
 	}
 
-	void DirectRenderer::SetViewportAndScissor(UINT x, UINT y, UINT w, UINT h)
+	void GraphicContext::SetViewportAndScissor(UINT x, UINT y, UINT w, UINT h)
 	{
 		SetViewport((float)x, (float)y, (float)w, (float)h);
 		SetScissor(x, y, x + w, y + h);
 	}
 
-	void DirectRenderer::SetStencilRef(UINT StencilRef)
+	void GraphicContext::SetStencilRef(UINT StencilRef)
 	{
 		commandList->OMSetStencilRef(StencilRef);
 	}
 
-	void DirectRenderer::SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY Topology)
+	void GraphicContext::SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY Topology)
 	{
 		commandList->IASetPrimitiveTopology(Topology);
 	}
 
-	void DirectRenderer::SetPipelineState(const GraphicsPSO & PSO)
+	void GraphicContext::SetPipelineState(const GraphicsPSO & PSO)
 	{
 		ID3D12PipelineState* PipelineState = PSO.GetPipelineStateObject();
 		if (PipelineState == m_CurGraphicsPipelineState)
@@ -464,67 +467,67 @@ namespace Renderer {
 		m_CurGraphicsPipelineState = PipelineState;
 	}
 
-	void DirectRenderer::SetConstantBuffer(UINT RootIndex, D3D12_GPU_VIRTUAL_ADDRESS CBV, UINT Offset)
+	void GraphicContext::SetConstantBuffer(UINT RootIndex, D3D12_GPU_VIRTUAL_ADDRESS CBV, UINT Offset)
 	{
 		commandList->SetGraphicsRootConstantBufferView(RootIndex, CBV + Offset);
 	}
 
-	void DirectRenderer::SetDynamicConstantBufferView(UINT RootIndex, size_t BufferSize, const void * BufferData)
+	void GraphicContext::SetDynamicConstantBufferView(UINT RootIndex, size_t BufferSize, const void * BufferData)
 	{
 		//TODO
 	}
 
-	void DirectRenderer::SetBufferSRV(UINT RootIndex, const D3D12_GPU_VIRTUAL_ADDRESS vAddress, UINT Offset)
+	void GraphicContext::SetBufferSRV(UINT RootIndex, const D3D12_GPU_VIRTUAL_ADDRESS vAddress, UINT Offset)
 	{
 		commandList->SetGraphicsRootShaderResourceView(RootIndex, vAddress + Offset);
 	}
 
-	void DirectRenderer::SetBufferUAV(UINT RootIndex, const D3D12_GPU_VIRTUAL_ADDRESS vAddress, UINT Offset)
+	void GraphicContext::SetBufferUAV(UINT RootIndex, const D3D12_GPU_VIRTUAL_ADDRESS vAddress, UINT Offset)
 	{
 		commandList->SetGraphicsRootUnorderedAccessView(RootIndex, vAddress + Offset);
 	}
 
-	void DirectRenderer::SetDescriptorTable(UINT RootIndex, D3D12_GPU_DESCRIPTOR_HANDLE FirstHandle)
+	void GraphicContext::SetDescriptorTable(UINT RootIndex, D3D12_GPU_DESCRIPTOR_HANDLE FirstHandle)
 	{
 		commandList->SetGraphicsRootDescriptorTable(RootIndex, FirstHandle);
 	}
 
-	void DirectRenderer::SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW & IBView)
+	void GraphicContext::SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW & IBView)
 	{
 		commandList->IASetIndexBuffer(&IBView);
 	}
 
-	void DirectRenderer::SetVertexBuffer(UINT Slot, const D3D12_VERTEX_BUFFER_VIEW & VBView)
+	void GraphicContext::SetVertexBuffer(UINT Slot, const D3D12_VERTEX_BUFFER_VIEW & VBView)
 	{
 		SetVertexBuffers(Slot, 1, &VBView);
 	}
 
-	void DirectRenderer::SetVertexBuffers(UINT StartSlot, UINT Count, const D3D12_VERTEX_BUFFER_VIEW VBViews[])
+	void GraphicContext::SetVertexBuffers(UINT StartSlot, UINT Count, const D3D12_VERTEX_BUFFER_VIEW VBViews[])
 	{
 		commandList->IASetVertexBuffers(StartSlot, Count, VBViews);
 	}
 
-	void DirectRenderer::Draw(UINT VertexCount, UINT VertexStartOffset)
+	void GraphicContext::Draw(UINT VertexCount, UINT VertexStartOffset)
 	{
 		DrawInstanced(VertexCount, 1, VertexStartOffset, 0);
 	}
 
-	void DirectRenderer::DrawIndexed(UINT IndexCount, UINT StartIndexLocation, INT BaseVertexLocation)
+	void GraphicContext::DrawIndexed(UINT IndexCount, UINT StartIndexLocation, INT BaseVertexLocation)
 	{
 		DrawIndexedInstanced(IndexCount, 1, StartIndexLocation, BaseVertexLocation, 0);
 	}
 
-	void DirectRenderer::DrawInstanced(UINT VertexCountPerInstance, UINT InstanceCount, UINT StartVertexLocation, UINT StartInstanceLocation)
+	void GraphicContext::DrawInstanced(UINT VertexCountPerInstance, UINT InstanceCount, UINT StartVertexLocation, UINT StartInstanceLocation)
 	{
 		commandList->DrawInstanced(VertexCountPerInstance, InstanceCount, StartVertexLocation, StartInstanceLocation);
 	}
 
-	void DirectRenderer::DrawIndexedInstanced(UINT IndexCountPerInstance, UINT InstanceCount, UINT StartIndexLocation, INT BaseVertexLocation, UINT StartInstanceLocation)
+	void GraphicContext::DrawIndexedInstanced(UINT IndexCountPerInstance, UINT InstanceCount, UINT StartIndexLocation, INT BaseVertexLocation, UINT StartInstanceLocation)
 	{
 		commandList->DrawIndexedInstanced(IndexCountPerInstance, InstanceCount, StartIndexLocation, BaseVertexLocation, StartInstanceLocation);
 	}
 
-	void DirectRenderer::PopulateCommandList()
+	void GraphicContext::PopulateCommandList()
 	{
 		//Reiniciamos el command allocator
 		ThrowIfFailed(commandAllocators[frameIndex]->Reset());
@@ -568,7 +571,7 @@ namespace Renderer {
 		ThrowIfFailed(commandList->Close());
 	}
 
-	std::vector<UINT8> DirectRenderer::GenerateTextureData()
+	std::vector<UINT8> GraphicContext::GenerateTextureData()
 	{
 		const UINT rowPitch = 512 * 4;
 		const UINT cellPitch = rowPitch >> 3;
@@ -604,7 +607,7 @@ namespace Renderer {
 		return data;
 	}
 
-	void DirectRenderer::GetHardwareAdapter(IDXGIFactory4 * pFactory, IDXGIAdapter1 ** ppAdapter)
+	void GraphicContext::GetHardwareAdapter(IDXGIFactory4 * pFactory, IDXGIAdapter1 ** ppAdapter)
 	{
 		ComPtr<IDXGIAdapter1> adapter;
 		*ppAdapter = nullptr;
@@ -629,7 +632,7 @@ namespace Renderer {
 	}
 
 	// Preparar para moverse al siguiente frame
-	void DirectRenderer::MoveToNextFrame()
+	void GraphicContext::MoveToNextFrame()
 	{
 		// Preparamos una señal al command list.
 		const UINT64 currentFenceValue = fenceValues[frameIndex];
@@ -652,7 +655,7 @@ namespace Renderer {
 		fenceValues[frameIndex] = currentFenceValue + 1;
 	}
 
-	void DirectRenderer::WaitForGpu()
+	void GraphicContext::WaitForGpu()
 	{
 		// Preparamos una señal al command list.
 		ThrowIfFailed(commandQueue->Signal(fence.Get(), fenceValues[frameIndex]));

@@ -69,9 +69,6 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\DirectRenderer.h">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Game1\TriangleGame.h">
       <Filter>Header Files\Game1</Filter>
     </ClInclude>
@@ -80,9 +77,6 @@
     </ClInclude>
     <ClInclude Include="Core\WinApplication.h">
       <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\Texture2D.h">
-      <Filter>Header Files\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Objects\Mesh.h">
       <Filter>Header Files\Objects</Filter>
@@ -162,11 +156,17 @@
     <ClInclude Include="Core\VectorMath.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\GpuResource.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\GraphicContext.h">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Texture2D.h">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Renderer\DirectRenderer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Game1\TriangleGame.cpp">
       <Filter>Source Files\Game1</Filter>
     </ClCompile>
@@ -211,6 +211,9 @@
     </ClCompile>
     <ClCompile Include="Core\Math\Random.cpp">
       <Filter>Header Files\Core\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\GraphicContext.cpp">
+      <Filter>Source Files\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

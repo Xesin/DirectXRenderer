@@ -1,7 +1,8 @@
 
 #include "WinApplication.h"
 #include "Core.h"
-#include "../Renderer/DirectRenderer.h"
+#include "../Renderer/GraphicContext.h"
+#include "EngineState.h"
 #include "Time.h"
 
 #define MAX_LOADSTRING 100
@@ -84,7 +85,7 @@ int WinApplication::InitInstance(HINSTANCE hInstance, int nCmdShow, EngineState*
 	
 	timer = new Time();
 
-	renderer = new DirectRenderer(engineApp->GetWidth(), engineApp->GetHeight());
+	renderer = new GraphicContext(engineApp->GetWidth(), engineApp->GetHeight());
 	renderer->Initialize();
 
 	engineApp->OnInit();

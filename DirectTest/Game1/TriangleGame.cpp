@@ -1,5 +1,5 @@
 #include "TriangleGame.h"
-#include "../Renderer/DirectRenderer.h"
+#include "../Renderer/GraphicContext.h"
 
 TriangleGame::TriangleGame(unsigned int width, unsigned int height, std::wstring name) :
 	EngineState(width, height, name)

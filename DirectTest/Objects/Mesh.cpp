@@ -3,7 +3,7 @@
 using namespace Renderer;
 using namespace Microsoft::WRL;
 
-Mesh::Mesh(DirectRenderer* context, Material* material) :
+Mesh::Mesh(GraphicContext* context, Material* material) :
 	vertexBuffer(nullptr),
 	indexBuffer(nullptr),
 	numVertices(0),

@@ -1,5 +1,5 @@
 #include "StandardMaterial.h"
-#include "../../Renderer/DirectRenderer.h"
+#include "../../Renderer/GraphicContext.h"
 #include "../DirectX/PipelineState.h"
 #include "../DirectX/RootSignature.h"
 
@@ -10,7 +10,7 @@ UINT StandardMaterial::pixelShaderDataLength = 0;
 
 using namespace Renderer;
 
-StandardMaterial::StandardMaterial(DirectRenderer * context) : Material(context)
+StandardMaterial::StandardMaterial(GraphicContext * context) : Material(context)
 {
 	// Describir y crear el shader resource view (SRV) descriptor heap.
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
