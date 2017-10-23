@@ -7,7 +7,7 @@ float Time::fixedDeltaTime = 0;
 
 Time::Time() {
 	currentTime = GetTime();
-	fixedDeltaTime = 1.f / 60.f;
+	fixedDeltaTime = 1.f / 30.f;
 	deltaTime = fixedDeltaTime;
 };
 
