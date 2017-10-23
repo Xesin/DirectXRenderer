@@ -3,6 +3,8 @@
 #include "../Core/Core.h"
 #include <d3dcompiler.h>
 #include "../Core/Materials/StandardMaterial.h"
+#include "../Core/Time.h"
+
 Mesh* newMesh;
 Mesh* newMesh2;
 StandardMaterial* mat;
@@ -345,9 +347,9 @@ namespace Renderer {
 		XMMATRIX projMat = XMLoadFloat4x4(&cameraProjMat); // load projection matrix
 		
 
-		newMesh->rotation.x += 0.001f;
-		newMesh->rotation.y += 0.002f;
-		newMesh->rotation.z += 0.003f;
+		newMesh->rotation.x += 0.5f * Time::deltaTime;
+		newMesh->rotation.y += 0.2f * Time::deltaTime;
+		newMesh->rotation.z += 0.4f * Time::deltaTime;
 
 		newMesh->Update(viewMat, projMat);
 

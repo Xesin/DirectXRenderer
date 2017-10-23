@@ -2,6 +2,7 @@
 #include "WinApplication.h"
 #include "Core.h"
 #include "../Renderer/DirectRenderer.h"
+#include "Time.h"
 
 #define MAX_LOADSTRING 100
 
@@ -13,6 +14,7 @@ WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
 HWND WinApplication::m_hwnd = nullptr;
+Time* WinApplication::timer = nullptr;
 
 int WinApplication::Run(EngineState* engineApp, HINSTANCE hInstance , int nCmdShow)
 {
@@ -38,6 +40,7 @@ int WinApplication::Run(EngineState* engineApp, HINSTANCE hInstance , int nCmdSh
 			DispatchMessage(&msg);
 		}
 		else {
+			timer->Update();
 			pSample->OnUpdate();
 			renderer->OnUpdate();
 			pSample->OnRender();
@@ -74,6 +77,8 @@ int WinApplication::InitInstance(HINSTANCE hInstance, int nCmdShow, EngineState*
 		return FALSE;
 	}
 	
+	timer = new Time();
+
 	renderer = new DirectRenderer(engineApp->GetWidth(), engineApp->GetHeight());
 	renderer->Initialize();
 

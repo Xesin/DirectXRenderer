@@ -120,6 +120,9 @@
     <ClInclude Include="Core\Materials\StandardMaterial.h">
       <Filter>Header Files\Core\Materials</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Time.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer\DirectRenderer.cpp">
@@ -154,6 +157,9 @@
     </ClCompile>
     <ClCompile Include="Core\Materials\StandardMaterial.cpp">
       <Filter>Source Files\Core\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Time.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

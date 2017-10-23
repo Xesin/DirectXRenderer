@@ -3,6 +3,7 @@
 #include <Windows.h>
 
 class EngineState;
+class Time;
 
 class WinApplication {
 public:
@@ -16,4 +17,5 @@ private:
 	static int InitInstance(HINSTANCE hInstance, int nCmdShow, EngineState* engineApp);
 	static ATOM MyRegisterClass(HINSTANCE hInstance);
 	static HWND m_hwnd;
+	static Time* timer;
 };
