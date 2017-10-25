@@ -257,7 +257,10 @@
     <ClCompile Include="EngineCore\Core\WinApplication.cpp" />
     <ClCompile Include="EngineCore\Renderer\Components\Mesh.cpp" />
     <ClCompile Include="EngineCore\Renderer\Core\GraphicContext.cpp" />
-    <ClCompile Include="EngineCore\Renderer\Graphics\ImageLoader.cpp" />
+    <ClCompile Include="EngineCore\Renderer\Graphics\DescriptorHeap.cpp" />
+    <ClCompile Include="EngineCore\Renderer\Graphics\GraphicsCore.cpp" />
+    <ClCompile Include="EngineCore\Renderer\Graphics\Texture2D.cpp" />
+    <ClCompile Include="EngineCore\Renderer\Graphics\TextureManager.cpp" />
     <ClCompile Include="EngineCore\Renderer\Graphics\PipelineState.cpp" />
     <ClCompile Include="EngineCore\Renderer\Graphics\RootSignature.cpp" />
     <ClCompile Include="EngineCore\Renderer\Materials\StandardMaterial.cpp" />
@@ -287,8 +290,12 @@
     <ClInclude Include="EngineCore\Renderer\Components\Mesh.h" />
     <ClInclude Include="EngineCore\Renderer\Core\GraphicContext.h" />
     <ClInclude Include="EngineCore\Renderer\Graphics\d3dx12.h" />
+    <ClInclude Include="EngineCore\Renderer\Graphics\DescriptorHeap.h" />
     <ClInclude Include="EngineCore\Renderer\Graphics\DirectXHelper.h" />
-    <ClInclude Include="EngineCore\Renderer\Graphics\ImageLoader.h" />
+    <ClInclude Include="EngineCore\Renderer\Graphics\GpuResource.h" />
+    <ClInclude Include="EngineCore\Renderer\Graphics\GraphicsCore.h" />
+    <ClInclude Include="EngineCore\Renderer\Graphics\Texture2D.h" />
+    <ClInclude Include="EngineCore\Renderer\Graphics\TextureManager.h" />
     <ClInclude Include="EngineCore\Renderer\Graphics\PipelineState.h" />
     <ClInclude Include="EngineCore\Renderer\Graphics\RootSignature.h" />
     <ClInclude Include="EngineCore\Renderer\Materials\Material.h" />

@@ -28,6 +28,7 @@ namespace Renderer {
 	{
 		LoadPipeline();
 		LoadAssets();
+		Graphics::Initialize();
 	}
 
 	// Cargar las dependencias de la rendering pipeline

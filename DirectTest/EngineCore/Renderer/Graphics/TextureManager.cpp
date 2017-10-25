@@ -1,4 +1,4 @@
-#include "ImageLoader.h"
+#include "TextureManager.h"
 
 IWICImagingFactory* ImageLoader::wicFactory = nullptr;
 
