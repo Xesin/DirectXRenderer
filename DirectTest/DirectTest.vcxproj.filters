@@ -1,220 +1,43 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Renderer">
-      <UniqueIdentifier>{f0227832-d5fe-4ec9-8b42-4e71ff552be4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Renderer">
-      <UniqueIdentifier>{86f36d5b-e89e-4d4f-8f4f-161e23efe289}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Game1">
-      <UniqueIdentifier>{cbdd1a22-3ae4-402e-b5cc-33ed12bff834}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Game1">
-      <UniqueIdentifier>{e4dd891b-27ea-4353-b034-4883f83efc77}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Core">
-      <UniqueIdentifier>{abbfbfdc-74e2-40ed-8e76-6830ce69107f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Core">
-      <UniqueIdentifier>{a16b563a-b659-4fcd-be2f-9711cb938ee4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Objects">
-      <UniqueIdentifier>{02bf517a-97af-4f16-a2d5-41e100703dab}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Objects">
-      <UniqueIdentifier>{36b389a0-4e1c-4a55-b175-9f5080a995e9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Core\Math">
-      <UniqueIdentifier>{ae2c3201-1911-44c3-8182-9315651a651e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Core\Math">
-      <UniqueIdentifier>{83876d18-fb90-4f85-91dc-13cea0792f3d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\Shaders">
       <UniqueIdentifier>{8970841b-3a77-4548-813c-ca16bb491c94}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Core\DirectX">
-      <UniqueIdentifier>{134919bf-dcef-43e0-8e0e-b1b15c273a83}</UniqueIdentifier>
+    <Filter Include="EngineCore">
+      <UniqueIdentifier>{629a9ac1-86d8-4756-bc56-1940876fb0c7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Core\DirectX">
-      <UniqueIdentifier>{9159d6c9-d826-4440-b505-3da2efce3c53}</UniqueIdentifier>
+    <Filter Include="EngineCore\Renderer">
+      <UniqueIdentifier>{acebb4a5-65fd-4d4c-8c2d-9a02e5c7366d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Core\Materials">
-      <UniqueIdentifier>{52286cfa-8507-44fd-9221-75d072402c23}</UniqueIdentifier>
+    <Filter Include="EngineCore\Core">
+      <UniqueIdentifier>{75de2734-e245-40c6-bb29-06ab6ce12639}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Core\Materials">
-      <UniqueIdentifier>{f42d7b68-b9da-47d0-8f9e-34fe3a954c1e}</UniqueIdentifier>
+    <Filter Include="EngineCore\Core\Graphics">
+      <UniqueIdentifier>{8febd9db-3d69-4858-84eb-6b3d6cf0335a}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Game1\TriangleGame.h">
-      <Filter>Header Files\Game1</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\EngineState.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\WinApplication.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Objects\Mesh.h">
-      <Filter>Header Files\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\ImageLoader.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Hash.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\DirectX\DirectXHelper.h">
-      <Filter>Header Files\Core\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\DirectX\RootSignature.h">
-      <Filter>Header Files\Core\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\DirectX\d3dx12.h">
-      <Filter>Header Files\Core\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\DirectX\PipelineState.h">
-      <Filter>Header Files\Core\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Utility.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Core.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Materials\Material.h">
-      <Filter>Header Files\Core\Materials</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Materials\StandardMaterial.h">
-      <Filter>Header Files\Core\Materials</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Time.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\FileUtility.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Color.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\Common.h">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\Frustum.h">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\Matrix3.h">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\Matrix4.h">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\Quaternion.h">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\Random.h">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\Scalar.h">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\Transform.h">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\Vector.h">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\BoundingPlane.h">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Math\BoundingSphere.h">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\VectorMath.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\GpuResource.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\GraphicContext.h">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\Texture2D.h">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Game1\TriangleGame.cpp">
-      <Filter>Source Files\Game1</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\WinApplication.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\EngineState.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Objects\Mesh.cpp">
-      <Filter>Source Files\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\ImageLoader.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Utility.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\DirectX\RootSignature.cpp">
-      <Filter>Source Files\Core\DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\DirectX\PipelineState.cpp">
-      <Filter>Source Files\Core\DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Materials\StandardMaterial.cpp">
-      <Filter>Source Files\Core\Materials</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Time.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\FileUtility.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Color.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Math\Frustum.cpp">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Math\Random.cpp">
-      <Filter>Header Files\Core\Math</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer\GraphicContext.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
+    <Filter Include="EngineCore\Core\Maths">
+      <UniqueIdentifier>{f2331767-9351-46bd-8c12-ec0ac505093f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EngineCore\Core\Utility">
+      <UniqueIdentifier>{3dafbdc4-85d6-43e5-a4ad-3255d8f63008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EngineCore\Renderer\Core">
+      <UniqueIdentifier>{797899e8-9b47-4930-bec3-2ff6a253c1ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EngineCore\Renderer\Graphics">
+      <UniqueIdentifier>{5c0f2d04-1751-4a49-82ec-719fef860b14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EngineCore\Renderer\Materials">
+      <UniqueIdentifier>{a4588495-cfb1-456f-a2d4-865dec7717e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EngineCore\Renderer\Components">
+      <UniqueIdentifier>{9d7c3d5d-50d0-42ca-9e5f-bd1eecd6de96}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\small.ico">
@@ -244,9 +67,143 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="Core\Math\Functions.inl">
-      <Filter>Header Files\Core\Math</Filter>
+    <ClCompile Include="EngineCore\Core\Graphics\Color.cpp">
+      <Filter>EngineCore\Core\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore\Core\Maths\Frustum.cpp">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore\Core\Maths\Random.cpp">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore\Core\Utility\Time.cpp">
+      <Filter>EngineCore\Core\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore\Core\Utility\Utility.cpp">
+      <Filter>EngineCore\Core\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore\Core\Utility\FileUtility.cpp">
+      <Filter>EngineCore\Core\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore\Core\WinApplication.cpp">
+      <Filter>EngineCore\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore\Renderer\Core\GraphicContext.cpp">
+      <Filter>EngineCore\Renderer\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore\Renderer\Graphics\ImageLoader.cpp">
+      <Filter>EngineCore\Renderer\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore\Renderer\Graphics\PipelineState.cpp">
+      <Filter>EngineCore\Renderer\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore\Renderer\Graphics\RootSignature.cpp">
+      <Filter>EngineCore\Renderer\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore\Renderer\Materials\StandardMaterial.cpp">
+      <Filter>EngineCore\Renderer\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="EngineCore\Renderer\Components\Mesh.cpp">
+      <Filter>EngineCore\Renderer\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineCore\Core\EngineApp.cpp">
+      <Filter>EngineCore\Core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EngineCore\Core\Graphics\Color.h">
+      <Filter>EngineCore\Core\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Maths\BoundingSphere.h">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Maths\Common.h">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Maths\Frustum.h">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Maths\Matrix3.h">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Maths\Matrix4.h">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Maths\Quaternion.h">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Maths\Random.h">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Maths\Scalar.h">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Maths\Transform.h">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Maths\Vector.h">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Maths\VectorMath.h">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Maths\BoundingPlane.h">
+      <Filter>EngineCore\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Utility\FileUtility.h">
+      <Filter>EngineCore\Core\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Utility\Hash.h">
+      <Filter>EngineCore\Core\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Utility\Time.h">
+      <Filter>EngineCore\Core\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Utility\Utility.h">
+      <Filter>EngineCore\Core\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\WinApplication.h">
+      <Filter>EngineCore\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Renderer\Core\GraphicContext.h">
+      <Filter>EngineCore\Renderer\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Renderer\Graphics\d3dx12.h">
+      <Filter>EngineCore\Renderer\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Renderer\Graphics\DirectXHelper.h">
+      <Filter>EngineCore\Renderer\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Renderer\Graphics\ImageLoader.h">
+      <Filter>EngineCore\Renderer\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Renderer\Graphics\PipelineState.h">
+      <Filter>EngineCore\Renderer\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Renderer\Graphics\RootSignature.h">
+      <Filter>EngineCore\Renderer\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Renderer\Materials\Material.h">
+      <Filter>EngineCore\Renderer\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Renderer\Materials\StandardMaterial.h">
+      <Filter>EngineCore\Renderer\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\Common.h">
+      <Filter>EngineCore\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="EngineCore\Renderer\Components\Mesh.h">
+      <Filter>EngineCore\Renderer\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineCore\Core\EngineApp.h">
+      <Filter>EngineCore\Core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="EngineCore\Core\Maths\Functions.inl">
+      <Filter>EngineCore\Core\Maths</Filter>
     </None>
   </ItemGroup>
 </Project>

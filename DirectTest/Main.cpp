@@ -1,8 +1,17 @@
-#include "Game1/TriangleGame.h"
+#include "EngineCore\Core\Common.h"
+#include "EngineCore\Core\EngineApp.h"
 
-_Use_decl_annotations_
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
-{
-	TriangleGame sample(1280, 720, L"Test DirectX");
-	return WinApplication::Run(&sample, hInstance, nCmdShow);
+class MyApp : public EngineApp {
+public:
+	MyApp();
+
+	virtual void OnInit() {} ;
+	virtual void OnUpdate() {};
+	virtual void OnRender() {};
+	virtual void OnDestroy() {};
+};
+MyApp::MyApp() : EngineApp() {
+
 }
+
+CREATE_APPLICATION(MyApp)

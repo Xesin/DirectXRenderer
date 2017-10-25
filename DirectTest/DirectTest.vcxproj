@@ -198,63 +198,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Core\Color.h" />
-    <ClInclude Include="Core\DirectX\d3dx12.h" />
-    <ClInclude Include="Core\DirectX\DirectXHelper.h" />
-    <ClInclude Include="Core\DirectX\PipelineState.h" />
-    <ClInclude Include="Core\DirectX\RootSignature.h" />
-    <ClInclude Include="Core\Core.h" />
-    <ClInclude Include="Core\EngineState.h" />
-    <ClInclude Include="Core\FileUtility.h" />
-    <ClInclude Include="Core\GpuResource.h" />
-    <ClInclude Include="Core\Hash.h" />
-    <ClInclude Include="Core\ImageLoader.h" />
-    <ClInclude Include="Core\Materials\Material.h" />
-    <ClInclude Include="Core\Materials\StandardMaterial.h" />
-    <ClInclude Include="Core\Math\BoundingPlane.h" />
-    <ClInclude Include="Core\Math\BoundingSphere.h" />
-    <ClInclude Include="Core\Math\Common.h" />
-    <ClInclude Include="Core\Math\Frustum.h" />
-    <ClInclude Include="Core\Math\Matrix3.h" />
-    <ClInclude Include="Core\Math\Matrix4.h" />
-    <ClInclude Include="Core\Math\Quaternion.h" />
-    <ClInclude Include="Core\Math\Random.h" />
-    <ClInclude Include="Core\Math\Scalar.h" />
-    <ClInclude Include="Core\Math\Transform.h" />
-    <ClInclude Include="Core\Math\Vector.h" />
-    <ClInclude Include="Core\Time.h" />
-    <ClInclude Include="Core\Utility.h" />
-    <ClInclude Include="Core\VectorMath.h" />
-    <ClInclude Include="Core\WinApplication.h" />
-    <ClInclude Include="Game1\TriangleGame.h" />
-    <ClInclude Include="Objects\Mesh.h" />
-    <ClInclude Include="Renderer\GraphicContext.h" />
-    <ClInclude Include="Renderer\Texture2D.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="targetver.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Core\Color.cpp" />
-    <ClCompile Include="Core\DirectX\PipelineState.cpp" />
-    <ClCompile Include="Core\DirectX\RootSignature.cpp" />
-    <ClCompile Include="Core\EngineState.cpp" />
-    <ClCompile Include="Core\FileUtility.cpp" />
-    <ClCompile Include="Core\ImageLoader.cpp" />
-    <ClCompile Include="Core\Materials\StandardMaterial.cpp" />
-    <ClCompile Include="Core\Math\Frustum.cpp" />
-    <ClCompile Include="Core\Math\Random.cpp" />
-    <ClCompile Include="Core\Time.cpp" />
-    <ClCompile Include="Core\Utility.cpp" />
-    <ClCompile Include="Core\WinApplication.cpp" />
-    <ClCompile Include="Game1\TriangleGame.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Objects\Mesh.cpp" />
-    <ClCompile Include="Renderer\GraphicContext.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="Resources\DirectTest.ico" />
     <Image Include="Resources\small.ico" />
   </ItemGroup>
@@ -304,8 +247,56 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Core\Math\Functions.inl" />
-    <None Include="packages.config" />
+    <ClCompile Include="EngineCore\Core\EngineApp.cpp" />
+    <ClCompile Include="EngineCore\Core\Graphics\Color.cpp" />
+    <ClCompile Include="EngineCore\Core\Maths\Frustum.cpp" />
+    <ClCompile Include="EngineCore\Core\Maths\Random.cpp" />
+    <ClCompile Include="EngineCore\Core\Utility\FileUtility.cpp" />
+    <ClCompile Include="EngineCore\Core\Utility\Time.cpp" />
+    <ClCompile Include="EngineCore\Core\Utility\Utility.cpp" />
+    <ClCompile Include="EngineCore\Core\WinApplication.cpp" />
+    <ClCompile Include="EngineCore\Renderer\Components\Mesh.cpp" />
+    <ClCompile Include="EngineCore\Renderer\Core\GraphicContext.cpp" />
+    <ClCompile Include="EngineCore\Renderer\Graphics\ImageLoader.cpp" />
+    <ClCompile Include="EngineCore\Renderer\Graphics\PipelineState.cpp" />
+    <ClCompile Include="EngineCore\Renderer\Graphics\RootSignature.cpp" />
+    <ClCompile Include="EngineCore\Renderer\Materials\StandardMaterial.cpp" />
+    <ClCompile Include="Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EngineCore\Core\Common.h" />
+    <ClInclude Include="EngineCore\Core\EngineApp.h" />
+    <ClInclude Include="EngineCore\Core\Graphics\Color.h" />
+    <ClInclude Include="EngineCore\Core\Maths\BoundingPlane.h" />
+    <ClInclude Include="EngineCore\Core\Maths\BoundingSphere.h" />
+    <ClInclude Include="EngineCore\Core\Maths\Common.h" />
+    <ClInclude Include="EngineCore\Core\Maths\Frustum.h" />
+    <ClInclude Include="EngineCore\Core\Maths\Matrix3.h" />
+    <ClInclude Include="EngineCore\Core\Maths\Matrix4.h" />
+    <ClInclude Include="EngineCore\Core\Maths\Quaternion.h" />
+    <ClInclude Include="EngineCore\Core\Maths\Random.h" />
+    <ClInclude Include="EngineCore\Core\Maths\Scalar.h" />
+    <ClInclude Include="EngineCore\Core\Maths\Transform.h" />
+    <ClInclude Include="EngineCore\Core\Maths\Vector.h" />
+    <ClInclude Include="EngineCore\Core\Maths\VectorMath.h" />
+    <ClInclude Include="EngineCore\Core\Utility\FileUtility.h" />
+    <ClInclude Include="EngineCore\Core\Utility\Hash.h" />
+    <ClInclude Include="EngineCore\Core\Utility\Time.h" />
+    <ClInclude Include="EngineCore\Core\Utility\Utility.h" />
+    <ClInclude Include="EngineCore\Core\WinApplication.h" />
+    <ClInclude Include="EngineCore\Renderer\Components\Mesh.h" />
+    <ClInclude Include="EngineCore\Renderer\Core\GraphicContext.h" />
+    <ClInclude Include="EngineCore\Renderer\Graphics\d3dx12.h" />
+    <ClInclude Include="EngineCore\Renderer\Graphics\DirectXHelper.h" />
+    <ClInclude Include="EngineCore\Renderer\Graphics\ImageLoader.h" />
+    <ClInclude Include="EngineCore\Renderer\Graphics\PipelineState.h" />
+    <ClInclude Include="EngineCore\Renderer\Graphics\RootSignature.h" />
+    <ClInclude Include="EngineCore\Renderer\Materials\Material.h" />
+    <ClInclude Include="EngineCore\Renderer\Materials\StandardMaterial.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="EngineCore\Core\Maths\Functions.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
