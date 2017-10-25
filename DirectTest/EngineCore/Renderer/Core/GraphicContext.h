@@ -2,9 +2,6 @@
 #include <dxgi1_4.h>
 #include "../Graphics/PipelineState.h"
 #include "../Graphics/RootSignature.h"
-#include "../../EngineCore/Core/Common.h"
-
-#include "../../EngineCore/Core/Graphics/Color.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -136,7 +133,7 @@ namespace Renderer {
 		UINT width; //Ancho de la pantalla
 		UINT height; //Alto de la pantalla
 
-		Color clearColor = Color(0.3f, 0.2f, 0.4f, 1.0f);
+		XMFLOAT4 clearColor = XMFLOAT4(0.3f, 0.2f, 0.4f, 1.0f);
 
 	};
 

@@ -4,7 +4,6 @@
 #include "../Components/Mesh.h"
 #include "../Materials/StandardMaterial.h"
 
-
 Mesh* newMesh;
 Mesh* newMesh2;
 StandardMaterial* mat;
@@ -549,7 +548,7 @@ namespace Renderer {
 		SetRenderTargets(1, &rtvHandle, dsvHandle);
 
 		// Grabar los comandos
-		commandList->ClearRenderTargetView(rtvHandle, clearColor.GetPtr(), 0, nullptr); //Limpiamos el canvas
+		commandList->ClearRenderTargetView(rtvHandle, reinterpret_cast<float*>(&clearColor), 0, nullptr); //Limpiamos el canvas
 
 		//Limpiamos el depth stencil
 		commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
