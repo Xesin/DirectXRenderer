@@ -91,6 +91,9 @@
     <ClCompile Include="EngineCore\Renderer\Core\GraphicContext.cpp">
       <Filter>EngineCore\Renderer\Core</Filter>
     </ClCompile>
+    <ClCompile Include="EngineCore\Renderer\Graphics\ImageLoader.cpp">
+      <Filter>EngineCore\Renderer\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="EngineCore\Renderer\Graphics\PipelineState.cpp">
       <Filter>EngineCore\Renderer\Graphics</Filter>
     </ClCompile>
@@ -106,18 +109,6 @@
     </ClCompile>
     <ClCompile Include="EngineCore\Core\EngineApp.cpp">
       <Filter>EngineCore\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="EngineCore\Renderer\Graphics\TextureManager.cpp">
-      <Filter>EngineCore\Renderer\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="EngineCore\Renderer\Graphics\Texture2D.cpp">
-      <Filter>EngineCore\Renderer\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="EngineCore\Renderer\Graphics\DescriptorHeap.cpp">
-      <Filter>EngineCore\Renderer\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="EngineCore\Renderer\Graphics\GraphicsCore.cpp">
-      <Filter>EngineCore\Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +175,9 @@
     <ClInclude Include="EngineCore\Renderer\Graphics\DirectXHelper.h">
       <Filter>EngineCore\Renderer\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="EngineCore\Renderer\Graphics\ImageLoader.h">
+      <Filter>EngineCore\Renderer\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="EngineCore\Renderer\Graphics\PipelineState.h">
       <Filter>EngineCore\Renderer\Graphics</Filter>
     </ClInclude>
@@ -205,21 +199,6 @@
     </ClInclude>
     <ClInclude Include="EngineCore\Core\EngineApp.h">
       <Filter>EngineCore\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="EngineCore\Renderer\Graphics\TextureManager.h">
-      <Filter>EngineCore\Renderer\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="EngineCore\Renderer\Graphics\GpuResource.h">
-      <Filter>EngineCore\Renderer\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="EngineCore\Renderer\Graphics\Texture2D.h">
-      <Filter>EngineCore\Renderer\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="EngineCore\Renderer\Graphics\DescriptorHeap.h">
-      <Filter>EngineCore\Renderer\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="EngineCore\Renderer\Graphics\GraphicsCore.h">
-      <Filter>EngineCore\Renderer\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

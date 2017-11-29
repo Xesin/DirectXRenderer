@@ -38,5 +38,5 @@
 #include "WinApplication.h"
 #include "Utility\Time.h"
 #include "..\Renderer\Graphics\DirectXHelper.h"
-#include "..\Renderer\Graphics\TextureManager.h"
+#include "..\Renderer\Graphics\ImageLoader.h"
 #include "Utility\Utility.h"

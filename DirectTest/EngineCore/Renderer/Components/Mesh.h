@@ -1,4 +1,5 @@
 #pragma once
+#include "..\..\Core\Common.h"
 #include "..\Core\GraphicContext.h"
 #include <wrl\client.h>
 

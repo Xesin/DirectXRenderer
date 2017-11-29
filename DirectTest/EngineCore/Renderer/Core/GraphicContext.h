@@ -2,7 +2,6 @@
 #include <dxgi1_4.h>
 #include "../Graphics/PipelineState.h"
 #include "../Graphics/RootSignature.h"
-#include "../Graphics/GraphicsCore.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
