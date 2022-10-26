@@ -7,18 +7,18 @@ public:
 	EngineApp();
 	virtual ~EngineApp();
 
-	virtual void OnInit() = 0;
-	virtual void OnUpdate() = 0;
-	virtual void OnRender() = 0;
-	virtual void OnDestroy() = 0;
+	virtual void OnInit() {}
+	virtual void OnUpdate() {}
+	virtual void OnRender() {}
+	virtual void OnDestroy() {}
 
 	// Samples override the event handlers to handle specific messages.
 	virtual void OnKeyDown(UINT8 /*key*/) {}
 	virtual void OnKeyUp(UINT8 /*key*/) {}
 
 	// Accessors.
-	const WCHAR* GetTitle() const { return m_title.c_str(); }
-	const void SetTitle(const wchar_t* className) { m_title.assign(className); }
+	INLINE const WCHAR* GetTitle() const { return m_title.c_str(); }
+	INLINE const void SetTitle(const wchar_t* className) { m_title.assign(className); }
 
 	void ParseCommandLineArgs(_In_reads_(argc) WCHAR* argv[], int argc);
 

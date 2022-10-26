@@ -27,7 +27,7 @@ struct AppBuffer
 
 namespace Renderer {
 
-	extern ComPtr<ID3D12Device> device; //Representa un adaptador virtual. Sirve para crear command lists, queues, fences...
+	extern ComPtr<ID3D12Device> device;
 	class GraphicContext {
 	public:
 		GraphicContext(UINT width, UINT height);
@@ -36,10 +36,6 @@ namespace Renderer {
 		bool OnRender();
 		void Release();
 		void OnResize(UINT width, UINT height);
-
-		/*void BeginQuery(ID3D12QueryHeap* QueryHeap, D3D12_QUERY_TYPE Type, UINT HeapIndex);
-		void EndQuery(ID3D12QueryHeap* QueryHeap, D3D12_QUERY_TYPE Type, UINT HeapIndex);
-		void ResolveQueryData(ID3D12QueryHeap* QueryHeap, D3D12_QUERY_TYPE Type, UINT StartIndex, UINT NumQueries, ID3D12Resource* DestinationBuffer, UINT64 DestinationBufferOffset);*/
 
 		void SetRootSignature(const RootSignature& RootSig);
 
@@ -89,49 +85,48 @@ namespace Renderer {
 		float aspectRatio;
 	public:
 		bool useWarpDevice;
-		ComPtr<ID3D12GraphicsCommandList> commandList; //Encapsula una lista de comandos que tiene que ejecutar la GPU
+		ComPtr<ID3D12GraphicsCommandList> commandList; 
 	private:
-		static const UINT FRAME_COUNT = 2; //Numero de frames que usamos para renderizar (2 = doble buffer)
+		static const UINT FRAME_COUNT = 2;
 
 		CD3DX12_VIEWPORT viewport;
-		CD3DX12_RECT scissorRect; //Rect en el que se va a pintar
-		ComPtr<IDXGISwapChain3> swapChain; //Objeto que intercala el back buffer para presentarlo por pantalla
-		ComPtr<ID3D12Resource> renderTargets[FRAME_COUNT]; //Tenemos un render target por cada frame (Double buffer)
-		ComPtr<ID3D12CommandAllocator> commandAllocators[FRAME_COUNT]; //el command allocator representa el almacenamiento de los GPU commands
-		ComPtr<ID3D12CommandQueue> commandQueue; //Provee metodos para enviar command lists, sincronizar la ejecución de command lists...
-		ID3D12RootSignature* currRootSignature; //Define que recursos están vinculados a la graphic pipeline.
+		CD3DX12_RECT scissorRect;
+		ComPtr<IDXGISwapChain3> swapChain;
+		ComPtr<ID3D12Resource> renderTargets[FRAME_COUNT];
+		ComPtr<ID3D12CommandAllocator> commandAllocators[FRAME_COUNT];
+		ComPtr<ID3D12CommandQueue> commandQueue;
+		ID3D12RootSignature* currRootSignature;
 		ID3D12PipelineState* m_CurGraphicsPipelineState;
-		ComPtr<ID3D12DescriptorHeap> rtvHeap; //almacena la posición de nuestro render target view
-		UINT rtvDescriptorSize; //Tamaño de nuestro rtv Descriptor
+		ComPtr<ID3D12DescriptorHeap> rtvHeap;
+		UINT rtvDescriptorSize;
 
-		ComPtr<ID3D12Resource> depthStencilBuffer; // Es la memoria de nuestro depth stencil.
-		ID3D12DescriptorHeap* dsDescriptorHeap; // es nuestro heap para el depth/stencil buffer descriptor
+		ComPtr<ID3D12Resource> depthStencilBuffer;
+		ID3D12DescriptorHeap* dsDescriptorHeap;
+		
+		UINT frameIndex; 
+		HANDLE fenceEvent; 
+		ComPtr<ID3D12Fence> fence; 
+		UINT64 fenceValue;
+		UINT64 fenceValues[FRAME_COUNT]; 
 
-		//Objetos de sincronización
-		UINT frameIndex; //Frame que actualmente estamos renderizando
-		HANDLE fenceEvent; //Evento para la sincronización
-		ComPtr<ID3D12Fence> fence; //Objeto que se encarga de crear los eventos de singronicación
-		UINT64 fenceValue; //Valor actual de nuestra barrera
-		UINT64 fenceValues[FRAME_COUNT]; //Valores según el frame index actual
-
-		XMFLOAT4X4 cameraProjMat; // Projection Matrix de la camara
-		XMFLOAT4X4 cameraViewMat; // View matrix de la camera
+		XMFLOAT4X4 cameraProjMat; 
+		XMFLOAT4X4 cameraViewMat; 
 
 		XMFLOAT4 cameraPosition;
-		XMFLOAT4 cameraTarget; // Vector que describe el punto al que mira la camara
-		XMFLOAT4 cameraUp; // El vector hacia arriba del mundo
+		XMFLOAT4 cameraTarget; 
+		XMFLOAT4 cameraUp; 
 		XMFLOAT4 cubePosition;
 		XMFLOAT4 cube2Pos;
-		XMFLOAT4X4 cubeWorldMat; // world matrix de nuestro primer cubo
-		XMFLOAT4X4 cubeRotMat; // rotation matrix de nuestro segundo cubo
+		XMFLOAT4X4 cubeWorldMat; 
+		XMFLOAT4X4 cubeRotMat; 
 
-		XMFLOAT4X4 cube2WorldMat; // world matrix de nuestro segundo cubo
-		XMFLOAT4X4 cube2RotMat;  // rotation matrix de nuestro segundo cubo
+		XMFLOAT4X4 cube2WorldMat; 
+		XMFLOAT4X4 cube2RotMat;  
 
-		int numCubeIndices; //Numero de indices de cada cubo
+		int numCubeIndices; 
 
-		UINT width; //Ancho de la pantalla
-		UINT height; //Alto de la pantalla
+		UINT width; 
+		UINT height; 
 
 		XMFLOAT4 clearColor = XMFLOAT4(0.3f, 0.2f, 0.4f, 1.0f);
 

@@ -30,30 +30,23 @@ namespace Renderer {
 		LoadAssets();
 	}
 
-	// Cargar las dependencias de la rendering pipeline
 	void GraphicContext::LoadPipeline()
 	{
 		UINT dxgiFactoryFlags = 0;
 
 #if defined(_DEBUG)
-		// Activamos el debug layer 
-		// NOTE: Activar el debug layer después de la creación del device invalidará el device activo.
 		{
 			ComPtr<ID3D12Debug> debugController;
 			if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
 			{
 				debugController->EnableDebugLayer();
-
-				// Activar capas de debug adicionales.
 				dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 			}
 		}
 #endif
-		//Permite crear objetos de la infraestructura DirectX
 		ComPtr<IDXGIFactory4> factory;
 		ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)));
 
-		//Info sobre warp adapter: https://msdn.microsoft.com/en-us/library/windows/desktop/gg615082(v=vs.85).aspx
 		if (useWarpDevice)
 		{
 			ComPtr<IDXGIAdapter> warpAdapter;
@@ -67,11 +60,9 @@ namespace Renderer {
 		}
 		else
 		{
-			//Optenemos el adaptador de hardware (GPU)
 			ComPtr<IDXGIAdapter1> hardwareAdapter;
 			GetHardwareAdapter(factory.Get(), &hardwareAdapter);
 
-			//Creamos el device a partir del adaptador
 			ThrowIfFailed(D3D12CreateDevice(
 				hardwareAdapter.Get(),
 				D3D_FEATURE_LEVEL_12_0,
@@ -79,14 +70,13 @@ namespace Renderer {
 			));
 		}
 
-		// Describir y crear la command queue.
+
 		D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 		queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 		queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
 		ThrowIfFailed(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue)));
 
-		// Describir y crear la swap chain.
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 		swapChainDesc.BufferCount = FRAME_COUNT;
 		swapChainDesc.Width = width;
@@ -106,62 +96,45 @@ namespace Renderer {
 			&swapChainTmp
 		));
 
-		//Hacemos la asociación a la ventana para poder representar lo que pintemos
 		ThrowIfFailed(factory->MakeWindowAssociation(WinApplication::GetHwnd(), DXGI_MWA_VALID));
 
-		//Almacenamos el swap chain temporal en nuestro objeto definitivo
 		ThrowIfFailed(swapChainTmp.As(&swapChain));
 
-		//Guardamos el indice del back buffer
 		frameIndex = swapChain->GetCurrentBackBufferIndex();
 
-		// Creamos los descriptor heaps.
 		{
-			// Describir y crear el render target view (RTV) descriptor heap.
 			D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
 			rtvHeapDesc.NumDescriptors = FRAME_COUNT;
 			rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 			rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 			ThrowIfFailed(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)));
 
-			//Obtenemos su tamaño
 			rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 		}
 
-		// Create frame resources.
 		{
 			CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart());
 
-			// Crear un RenderTarget y un command allocator por cada frame
 			for (UINT n = 0; n < FRAME_COUNT; n++)
 			{
-				//Obtenemos el buffer
 				ThrowIfFailed(swapChain->GetBuffer(n, IID_PPV_ARGS(&renderTargets[n])));
 
-				//Creamos el render target sobre y lo almacenamos en el buffer
 				device->CreateRenderTargetView(renderTargets[n].Get(), nullptr, rtvHandle);
-				//Hacemos un offset de la memoria
 				rtvHandle.Offset(1, rtvDescriptorSize);
 
-				//Creamos el command allocator
 				ThrowIfFailed(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocators[n])));
 			}
 		}
 	}
 
-	// Cargar los assets para el ejemplo.
 	void GraphicContext::LoadAssets()
 	{
-		// Crear el command list
 		ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocators[frameIndex].Get(), nullptr, IID_PPV_ARGS(&commandList)));
 
-		// Crear los objetos de sincronización
 		{
-			//Evento de la barrera
 			ThrowIfFailed(device->CreateFence(fenceValues[frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
 			fenceValues[frameIndex]++;
 
-			//Creamos el evento que se usa para la sincronización.
 			fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 			if (fenceEvent == nullptr)
 			{
@@ -169,47 +142,44 @@ namespace Renderer {
 			}
 		}
 
-		// Crear el vertex buffer y el index buffer
 		{
-			// Creamos la lista de vertices que necesita el cubo
 			std::vector<Vertex> vecVList;
 			Vertex* vList;
-			// Cara delantera (cerca de la camara)
-			//{posX, posY, poxZ}, {u,v}, {r, g, b, a}, {x, y, z} (posicion, UVs, color, normales (Smooth))
+			// Front Face
 			vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f },	{ 0.0f,  0.0f, -1.0f} });
 			vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f },	{  0.0f, 0.0f, -1.0f } });
 			vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, -1.0f } });
 			vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  0.0f,  0.0f, -1.0f } });
 
-			// Cara derecha
+			// Right Face
 			vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },	{  1.0f, 0.0f, 0.0f} });
 			vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } ,		{  1.0f,  0.0f,  0.0f} });
 			vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  1.0f, 0.0f,  0.0f} });
 			vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  1.0f,  0.0f, 0.0f} });
 
 
-			// cara izquierda
+			// Left Face
 			vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },		{ -1.0f,  0.0f,  0.0f } });
 			vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },	{ -1.0f, 0.0f, 0.0f} });
 			vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ -1.0f, 0.0f,  0.0f} });
 			vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ -1.0f,  0.0f, 0.0f} });
 
 
-			// Cara trasera
+			// Back Face
 			vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f } ,		{  0.0f,  0.0f,  1.0f } });
 			vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },	{ 0.0f, 0.0f,  1.0f} });
 			vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{  0.0f, 0.0f,  1.0f } });
 			vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{ 0.0f,  0.0f,  1.0f } });
 
 
-			// Cara de arriba
+			// Upper Face
 			vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },	{ 0.0f,  1.0f, 0.0f} });
 			vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } ,		{  0.0f,  1.0f,  0.0f} });
 			vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, 0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{  0.0f,  1.0f, 0.0f} });
 			vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, 0.25f * aspectRatio, 0.25f * aspectRatio },{ 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },		{ 0.0f,  1.0f,  0.0f} });
 
 
-			// Cara de abajo
+			// Bottom Face
 			vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, -0.25f * aspectRatio, 0.25f * aspectRatio },{ 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f },		{  0.0f, -1.0f,  0.0f } });
 			vecVList.insert(vecVList.end(), { { -0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },	{ 0.0f, -1.0f, 0.0f} });
 			vecVList.insert(vecVList.end(), { { 0.25f * aspectRatio, -0.25f * aspectRatio, -0.25f * aspectRatio },{ 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } ,	{  0.0f, -1.0f, 0.0f} });
@@ -217,38 +187,35 @@ namespace Renderer {
 
 			vList = vecVList.data();
 
-			// Lista de indices, indica que vertices van unidos
 			DWORD iList[] = {
-				// Cara delantera
-				0, 1, 2, // primer triangulo
-				0, 3, 1, // segundo triangulo
+				// Front Face
+				0, 1, 2, 
+				0, 3, 1, 
 
-				// Cara izquierda
-				4, 5, 6, // primer triangulo
-				4, 7, 5, // segundo triangulo
+				// Left Face
+				4, 5, 6, 
+				4, 7, 5, 
 
-				// Cara derecha
-				8, 9, 10, // primer triangulo
-				8, 11, 9, // segundo triangulo
+				// Right Face
+				8, 9, 10, 
+				8, 11, 9, 
 
-				// Cara trasera
-				12, 13, 14, // primer triangulo
-				12, 15, 13, // segundo triangulo
+				// Back Face
+				12, 13, 14, 
+				12, 15, 13, 
 
-				// Cara de arriba
-				16, 17, 18, // primer triangulo
-				16, 19, 17, // segundo triangulo
+				// Upper Face
+				16, 17, 18, 
+				16, 19, 17, 
 
-				// Cara de abajo
-				20, 21, 22, // primer triangulo
-				20, 23, 21, // segundo triangulo
+				// Bottom Face
+				20, 21, 22, 
+				20, 23, 21, 
 			};
 
-			//Tamaño de los buffers
 			int vBufferSize = sizeof(vecVList);
 			int iBufferSize = sizeof(iList);
-
-			//Cantidad de indices de cada cubo
+			
 			numCubeIndices = sizeof(iList) / sizeof(DWORD);
 
 			newMesh = new Mesh(this, nullptr);
@@ -269,7 +236,6 @@ namespace Renderer {
 			newMesh2->scale = XMFLOAT3(.5f, 0.5f, 0.5f);
 		}
 
-		//Crear el depth/stencil
 		{
 			D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
 			dsvHeapDesc.NumDescriptors = 1;
@@ -287,7 +253,6 @@ namespace Renderer {
 			depthOptimizedClearValue.DepthStencil.Depth = 1.0f;
 			depthOptimizedClearValue.DepthStencil.Stencil = 0;
 
-			//Solo creamos un heap de tipo default ya que sólo vamos a escribir en el
 			device->CreateCommittedResource(
 				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 				D3D12_HEAP_FLAG_NONE,
@@ -298,42 +263,33 @@ namespace Renderer {
 			);
 			dsDescriptorHeap->SetName(L"Depth/Stencil Resource Heap");
 
-			//Creamos el stencil view
 			device->CreateDepthStencilView(depthStencilBuffer.Get(), &depthStencilDesc, dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 		}
 
 		mat = new StandardMaterial(this);
 
-		//Crear los view y projection matrix
 		{
-			//Matrix de perspectiva
 			XMMATRIX tmpMat = XMMatrixPerspectiveFovLH(60.0f*(3.14f / 180.0f), (float)width / (float)height, 0.1f, 1000.0f);
 
-			//Asignamos el projection matrix
 			XMStoreFloat4x4(&cameraProjMat, tmpMat);
 
-			// Set de la camara
 			cameraPosition = XMFLOAT4(0.0f, 0.0f, -4.0f, 0.0f);
 			cameraTarget = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 			cameraUp = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
-			// Creamos el view matrix
 			XMVECTOR cPos = XMLoadFloat4(&cameraPosition);
 			XMVECTOR cTarg = XMLoadFloat4(&cameraTarget);
 			XMVECTOR cUp = XMLoadFloat4(&cameraUp);
 
 			tmpMat = XMMatrixLookAtLH(cPos, cTarg, cUp);
 
-			//Asignamos el view matrix
 			XMStoreFloat4x4(&cameraViewMat, tmpMat);
 		}
 
-		// Ahora ejecutamos el command list para cargar los assets
 		commandList->Close();
 		ID3D12CommandList* ppCommandLists[] = { commandList.Get() };
 		commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
-		//Esperamos a que todos los comandos acaben de ejecutarse para continuar
 		WaitForGpu();
 
 	}
@@ -356,17 +312,13 @@ namespace Renderer {
 
 	bool GraphicContext::OnRender()
 	{
-		// Grabamos todos los comandos
 		PopulateCommandList();
 
-		// Ejecutamos los comandos
 		ID3D12CommandList* ppCommandLists[] = { commandList.Get() };
 		commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
-		// Presentamos el frame
 		ThrowIfFailed(swapChain->Present(1, 0));
 
-		//Nos movemos al siguiente frame si ya ha acabado todo
 		MoveToNextFrame();
 
 		return true;
@@ -526,31 +478,23 @@ namespace Renderer {
 
 	void GraphicContext::PopulateCommandList()
 	{
-		//Reiniciamos el command allocator
 		ThrowIfFailed(commandAllocators[frameIndex]->Reset());
 
-		//Reiniciamos el commandlist
 		ThrowIfFailed(commandList->Reset(commandAllocators[frameIndex].Get(), nullptr));
 
 		mat->BeginRender();
 
-		//Asignamos el viewport y el scissorRect
 		SetViewportAndScissor(viewport, scissorRect);
 
-		// Indicamos que el backbuffer se va a usar como render target
 		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTargets[frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-		//Obtenemos los CPU Descriptor handle
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart(), frameIndex, rtvDescriptorSize);
 		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
-		// Asignamos el render target para el output merger stage (the output of the pipeline)
 		SetRenderTargets(1, &rtvHandle, dsvHandle);
 
-		// Grabar los comandos
 		commandList->ClearRenderTargetView(rtvHandle, reinterpret_cast<float*>(&clearColor), 0, nullptr); //Limpiamos el canvas
 
-		//Limpiamos el depth stencil
 		commandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 		
 		newMesh->Begin();
@@ -560,11 +504,10 @@ namespace Renderer {
 		newMesh2->Begin();
 		newMesh2->Draw();
 
-		// Indicamos que el backbuffer va a ser usado para presentar
 		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTargets[frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 		currRootSignature = nullptr;
 		m_CurGraphicsPipelineState = nullptr;
-		//Finalmente cerramos el command list para dejar de grabar
+
 		ThrowIfFailed(commandList->Close());
 	}
 
@@ -628,40 +571,31 @@ namespace Renderer {
 		*ppAdapter = adapter.Detach();
 	}
 
-	// Preparar para moverse al siguiente frame
 	void GraphicContext::MoveToNextFrame()
 	{
-		// Preparamos una señal al command list.
 		const UINT64 currentFenceValue = fenceValues[frameIndex];
 		ThrowIfFailed(commandQueue->Signal(fence.Get(), currentFenceValue));
 
-		// Actualizamos el frame index
 		frameIndex = swapChain->GetCurrentBackBufferIndex();
 
-		//Obtenemos el valor de completado
 		UINT64 compValue = fence->GetCompletedValue();
 
-		// Si el frame no está listo todavia, esperamos
 		if (compValue < fenceValues[frameIndex])
 		{
 			ThrowIfFailed(fence->SetEventOnCompletion(fenceValues[frameIndex], fenceEvent));
 			WaitForSingleObjectEx(fenceEvent, INFINITE, FALSE);
 		}
 
-		// Asignamos el fence value para el siguiente frame.
 		fenceValues[frameIndex] = currentFenceValue + 1;
 	}
 
 	void GraphicContext::WaitForGpu()
 	{
-		// Preparamos una señal al command list.
 		ThrowIfFailed(commandQueue->Signal(fence.Get(), fenceValues[frameIndex]));
 
-		// Esperamos hasta que todo se haya procesado
 		ThrowIfFailed(fence->SetEventOnCompletion(fenceValues[frameIndex], fenceEvent));
 		WaitForSingleObjectEx(fenceEvent, INFINITE, FALSE);
 
-		// Asignamos el fence value para el frame actual.
 		fenceValues[frameIndex]++;
 	}
 }

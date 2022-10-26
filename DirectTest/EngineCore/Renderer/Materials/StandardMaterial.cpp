@@ -12,7 +12,6 @@ using namespace Renderer;
 
 StandardMaterial::StandardMaterial(GraphicContext * context) : Material(context)
 {
-	// Describir y crear el shader resource view (SRV) descriptor heap.
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
 	srvHeapDesc.NumDescriptors = 1;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -21,7 +20,6 @@ StandardMaterial::StandardMaterial(GraphicContext * context) : Material(context)
 
 	rootSignature.Reset(2, 1);
 
-	//Creamos un sampler desc para nuestro sampler estatico
 	D3D12_SAMPLER_DESC sampler = {};
 	sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
 	sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -48,15 +46,13 @@ StandardMaterial::StandardMaterial(GraphicContext * context) : Material(context)
 		{ "NORMAL", 0,  DXGI_FORMAT_R32G32B32_FLOAT, 0, 12 + 8 + 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
-	//Cargamos el vertex shader
 	if (vertexShaderDataLength <= 0) {
 		ThrowIfFailed(ReadDataFromFile(L"Resources\\ShaderLib\\VertexShader.cso", &pVertexShaderData, &vertexShaderDataLength));
 	}
-	//Cargamos el pixel shader
 	if (pixelShaderDataLength <= 0) {
 		ThrowIfFailed(ReadDataFromFile(L"Resources\\ShaderLib\\PixelShader.cso", &pPixelShaderData, &pixelShaderDataLength));
 	}
-	// Creamos un pipeline state object (PSO)
+
 	CD3DX12_RASTERIZER_DESC rasterDesc(D3D12_DEFAULT);
 	CD3DX12_DEPTH_STENCIL_DESC depthStencilDesc(D3D12_DEFAULT);
 	CD3DX12_BLEND_DESC blendDesc(D3D12_DEFAULT);
@@ -74,16 +70,12 @@ StandardMaterial::StandardMaterial(GraphicContext * context) : Material(context)
 	graphicPSO.Finalize();
 
 
-	
-	//Creamos la textura
 	{
 		int imageBytesPerRow;
 		Image imageData;
 		ZeroMemory(&imageData, sizeof(Image));
 		ImageLoader::LoadImageFromFile(L"Resources/woodTexture.jpg", imageBytesPerRow, &imageData);
 
-
-		// Creamos la descripcion
 		D3D12_RESOURCE_DESC textureDesc = {};
 		textureDesc.MipLevels = 1;
 		textureDesc.Format = imageData.dxgiFormat;
@@ -95,7 +87,7 @@ StandardMaterial::StandardMaterial(GraphicContext * context) : Material(context)
 		textureDesc.SampleDesc.Quality = 0;
 		textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
-		//Mismo proceso que antes, primero un heap de tipo default
+
 		ThrowIfFailed(device->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE,
@@ -107,10 +99,8 @@ StandardMaterial::StandardMaterial(GraphicContext * context) : Material(context)
 
 		UINT64 textureUploadBufferSize;
 
-		//Esta funcion obtiene el tamaño del buffer que necesitamos
 		device->GetCopyableFootprints(&textureDesc, 0, 1, 0, nullptr, nullptr, nullptr, &textureUploadBufferSize);
 
-		// Ahora podemos crear el upload heap
 		ThrowIfFailed(device->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 			D3D12_HEAP_FLAG_NONE,
@@ -125,12 +115,10 @@ StandardMaterial::StandardMaterial(GraphicContext * context) : Material(context)
 		textureData.RowPitch = imageBytesPerRow;
 		textureData.SlicePitch = textureData.RowPitch * imageData.textureHeight;
 
-		//Copiamos la textura al default heap
 		UpdateSubresources(context->commandList.Get(), textureBuffer, textureUploadHeap.Get(), 0, 0, 1, &textureData);
 
 		context->commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(textureBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
 
-		// Describimos y creamos el SRV para la textura
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srvDesc.Format = textureDesc.Format;
@@ -148,15 +136,11 @@ StandardMaterial::~StandardMaterial()
 
 void StandardMaterial::BeginRender() {
 
-	//Asignamos el PSO
 	context->SetPipelineState(graphicPSO);
-	// Asignamos el root signature
 	context->SetRootSignature(rootSignature);
 
-	// Asignamos el SRV Heap
 	ID3D12DescriptorHeap* descriptorHeaps[] = { srvHeap.Get() };
 	context->commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-	// Asignamos el descriptor table
 	context->SetDescriptorTable(1, srvHeap->GetGPUDescriptorHandleForHeapStart());
 }

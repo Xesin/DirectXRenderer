@@ -13,10 +13,10 @@ public:
 public:
 	RootSignature rootSignature;
 	GraphicsPSO graphicPSO;
-	ComPtr<ID3D12DescriptorHeap> srvHeap; //almacena la posición de nuestro Shader Resource view
-	ID3D12Resource* textureBuffer; //El buffer encargado de cargar la textura a la GPU
+	ComPtr<ID3D12DescriptorHeap> srvHeap;
+	ID3D12Resource* textureBuffer; 
 	ComPtr<ID3D12Resource> textureUploadHeap;
-	UINT8* textureBufferGPUAddress; //Posición de memoria de nuestro texture buffer
+	UINT8* textureBufferGPUAddress;
 
 	static UINT8* pVertexShaderData;
 	static UINT vertexShaderDataLength;
